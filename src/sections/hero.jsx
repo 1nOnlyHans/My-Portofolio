@@ -1,7 +1,7 @@
-import { div } from "framer-motion/client";
-import hansPhoto from "../assets/images/hans.jpg";
 import { useState, useRef, useEffect } from "react";
-import { Button } from "../components/ui/button";
+
+const finalCommand = 'echo "Ready to build something great."';
+
 function HeroName() {
   return (
     <div className="max-w-3xl space-y-6">
@@ -62,7 +62,7 @@ function HeroName() {
       </p>
       <div className="flex flex-center gap-3 items-center">
         <a
-          href="#work"
+          href="#projects"
           className="px-5 py-2.5 bg-foreground text-background text-sm hover:opacity-80 transition-opacity"
         >
           View My Works
@@ -85,14 +85,13 @@ function HeroTerminal() {
     { prompt: "hans@portfolio:~", command: "role.txt" },
     { output: "Full-Stack Developer" },
     { prompt: "hans@portfolio:~", command: "ls skills" },
-    { output: "Laravel · PHP · React · Vuejs ·Inertia Js· Tailwind CSS " },
+    { output: "Web Development · UI/UX Design · Video Editing" },
     { prompt: "hans@portfolio:~", command: "ls skills" },
-    { output: "Laravel · PHP · React · Vuejs ·Inertia Js· Tailwind CSS " },
-    { prompt: "hans@portfolio:~", command: "pwd" },
     { output: "/Cavite/Philippines" },
   ];
 
   const [visibleLines, setVisibleLines] = useState(0);
+  const [typedCommand, setTypedCommand] = useState("");
 
   const intervalRef = useRef(setTimeout(() => {}, 0));
 
@@ -107,7 +106,23 @@ function HeroTerminal() {
     };
     intervalRef.current = setTimeout(tick, 500);
     return () => clearTimeout(intervalRef.current);
-  }, []);
+  }, [commandLines.length]);
+
+  useEffect(() => {
+    if (visibleLines < commandLines.length) return;
+
+    let characterIndex = 0;
+    const typingInterval = setInterval(() => {
+      characterIndex++;
+      setTypedCommand(finalCommand.slice(0, characterIndex));
+
+      if (characterIndex === finalCommand.length) {
+        clearInterval(typingInterval);
+      }
+    }, 55);
+
+    return () => clearInterval(typingInterval);
+  }, [visibleLines, commandLines.length]);
 
   return (
     <div
@@ -163,6 +178,16 @@ function HeroTerminal() {
             )}
           </div>
         ))}
+        <div
+          className={`whitespace-pre-wrap transition-opacity duration-300 ${
+            visibleLines === commandLines.length ? "opacity-100" : "opacity-0"
+          }`}
+          aria-label={`Terminal prompt ${typedCommand}`}
+        >
+          <span className="text-green-500">hans@portfolio:~ </span>
+          <span>{typedCommand}</span>
+          <span className="terminal-cursor" aria-hidden="true" />
+        </div>
       </div>
     </div>
   );
@@ -170,10 +195,10 @@ function HeroTerminal() {
 export default function Hero() {
   return (
     <section
-      id="about"
-      className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 lg:py-20"
+      id="home"
+      className="portfolio-section"
     >
-      <div className="grid md:grid-cols-2 gap-16 items-center">
+      <div className="grid w-full gap-10 md:grid-cols-2 md:items-center lg:gap-16">
         <HeroName />
         <HeroTerminal />
       </div>

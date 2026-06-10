@@ -134,7 +134,7 @@
   }
 
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
+    @apply overflow-x-clip bg-background text-foreground transition-colors duration-300;
   }
 
   /**
@@ -144,6 +144,9 @@
 
   html {
     font-size: var(--font-size);
+    scroll-behavior: smooth;
+    scroll-padding-top: 4.5rem;
+    scroll-snap-type: y mandatory;
   }
 
   h1 {
@@ -186,5 +189,67 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
+  }
+}
+
+@layer components {
+  .portfolio-section {
+    @apply relative mx-auto flex w-full max-w-5xl snap-start snap-always items-center px-4 py-12 sm:px-6 sm:py-16 lg:py-20;
+    min-height: calc(100svh - 4.5rem);
+    scroll-margin-top: 4.5rem;
+  }
+
+  .portfolio-section::after {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 100vw;
+    height: 1px;
+    content: "";
+    background: var(--border);
+    transform: translateX(-50%);
+  }
+
+  .section-label {
+    @apply mb-4 block font-mono text-sm font-light uppercase tracking-widest text-muted-foreground;
+  }
+
+  .section-title {
+    @apply text-4xl tracking-tight text-foreground sm:text-5xl;
+    font-family: "Playfair Display", serif;
+    font-weight: 400;
+  }
+
+  .terminal-cursor {
+    display: inline-block;
+    width: 0.55rem;
+    height: 1em;
+    margin-left: 0.2rem;
+    vertical-align: -0.12em;
+    background: currentColor;
+    animation: terminal-blink 0.9s steps(1) infinite;
+  }
+}
+
+@keyframes terminal-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+
+  46%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+    scroll-snap-type: none;
+  }
+
+  .terminal-cursor {
+    animation: none;
   }
 }
