@@ -1,15 +1,28 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import Navbar from "./components/layout/navbar";
+import Footer from "./components/layout/footer";
+import Hero from "./sections/hero";
+import About from "./sections/about";
+import Contact from "./sections/contact";
+import Projects from "./sections/projects";
+import Skills from "./sections/skills";
+import "./App.css";
 
 function App() {
   return (
-    <h1 className="text-3xl font-serif font-bold underline text-red-500">
-      My Portfolio
-    </h1>
-  )
+    <>
+      <div className="mx-auto min-h-screen w-full max-w-5xl pt-18">
+        <Navbar />
+        <main>
+          <Hero />
+          <About />
+          <Projects />
+          <Skills />
+          <Contact />
+        </main>
+        <Footer />
+      </div>
+    </>
+  );
 }
 
-export default App
+export default App;
