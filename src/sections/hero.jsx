@@ -29,18 +29,6 @@ function HeroName() {
             Diaz
           </span>
         </h1>
-
-        {/* <div className="relative w-28 shrink-0 sm:w-36 md:w-44">
-          <div className="absolute -inset-2 -z-10 translate-x-2 translate-y-2 border border-border bg-secondary" />
-          <div className="aspect-square overflow-hidden shadow-sm">
-            <img
-              src={hansPhoto}
-              alt="Hans Diaz sitting outdoors"
-              className="h-full w-full scale-150 object-cover"
-              style={{ objectPosition: "54% 100%" }}
-            />
-          </div>
-        </div> */}
       </div>
 
       <p
@@ -86,7 +74,7 @@ function HeroTerminal() {
     { output: "Full-Stack Developer" },
     { prompt: "hans@portfolio:~", command: "ls skills" },
     { output: "Web Development · UI/UX Design · Video Editing" },
-    { prompt: "hans@portfolio:~", command: "ls skills" },
+    { prompt: "hans@portfolio:~", command: "pwd" },
     { output: "/Cavite/Philippines" },
   ];
 
