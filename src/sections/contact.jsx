@@ -2,49 +2,128 @@ import { ArrowUpRight, Send } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { SiGmail } from "react-icons/si";
 import emailjs from "@emailjs/browser";
-import { useState, useRef } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
+import { useEffect, useState, useRef } from "react";
 import ScrollReveal from "../components/ui/scroll-reveal";
+
+const MIN_FORM_FILL_TIME_MS = 3000;
+const SUBMISSION_COOLDOWN_MS = 60000;
+const LAST_SUBMISSION_KEY = "portfolio-contact-last-submission";
 
 function ContactForm() {
   const form = useRef(null);
+  const recaptcha = useRef(null);
+  const isSendingRef = useRef(false);
+  const formOpenedAt = useRef(0);
   const [isSending, setIsSending] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState("");
   const [status, setStatus] = useState({ type: "", message: "" });
 
   const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
   const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
   const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
+  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+
+  useEffect(() => {
+    formOpenedAt.current = Date.now();
+  }, []);
 
   const sendEmail = async (e) => {
     e.preventDefault();
 
-    if (!serviceId || !templateId || !publicKey) {
-      setStatus({
-        type: "error",
-        message:
-          "Email service is not configured for this deployment. Please try again later.",
-      });
-      return;
-    }
+    if (isSendingRef.current) return;
 
-    setIsSending(true);
-    setStatus({ type: "", message: "" });
+    const formData = new FormData(form.current);
+    const name = String(formData.get("user_name") || "").trim();
+    const email = String(formData.get("user_email") || "").trim();
+    const message = String(formData.get("message") || "").trim();
+    const honeypot = String(formData.get("website") || "").trim();
 
-    try {
-      const formData = new FormData(form.current);
-      const templateParams = {
-        title: "New portfolio contact",
-        user_name: formData.get("user_name"),
-        user_email: formData.get("user_email"),
-        message: formData.get("message"),
-      };
-
-      await emailjs.send(serviceId, templateId, templateParams, { publicKey });
-
+    // Bots commonly fill every field, including fields hidden from real users.
+    if (honeypot) {
       setStatus({
         type: "success",
         message: "Message sent successfully. I'll get back to you soon.",
       });
       form.current.reset();
+      return;
+    }
+
+    if (Date.now() - formOpenedAt.current < MIN_FORM_FILL_TIME_MS) {
+      setStatus({
+        type: "error",
+        message: "Please take a moment to complete the form before sending.",
+      });
+      return;
+    }
+
+    const lastSubmission = Number(
+      window.localStorage.getItem(LAST_SUBMISSION_KEY) || 0,
+    );
+    const cooldownRemaining = SUBMISSION_COOLDOWN_MS - (Date.now() - lastSubmission);
+
+    if (cooldownRemaining > 0) {
+      setStatus({
+        type: "error",
+        message: `Please wait ${Math.ceil(cooldownRemaining / 1000)} seconds before sending another message.`,
+      });
+      return;
+    }
+
+    if (name.length < 2 || message.length < 10) {
+      setStatus({
+        type: "error",
+        message: "Please enter your name and a message of at least 10 characters.",
+      });
+      return;
+    }
+
+    if (!recaptchaToken) {
+      setStatus({
+        type: "error",
+        message: "Please complete the reCAPTCHA verification.",
+      });
+      return;
+    }
+
+    if (!serviceId || !templateId || !publicKey || !recaptchaSiteKey) {
+      setStatus({
+        type: "error",
+        message:
+          "The contact form is not configured for this deployment. Please try again later.",
+      });
+      return;
+    }
+
+    isSendingRef.current = true;
+    setIsSending(true);
+    setStatus({ type: "", message: "" });
+
+    try {
+      const templateParams = {
+        title: "New portfolio contact",
+        user_name: name,
+        user_email: email,
+        message,
+        "g-recaptcha-response": recaptchaToken,
+      };
+
+      await emailjs.send(serviceId, templateId, templateParams, {
+        publicKey,
+        blockHeadless: true,
+        limitRate: {
+          id: "portfolio-contact-form",
+          throttle: SUBMISSION_COOLDOWN_MS,
+        },
+      });
+
+      setStatus({
+        type: "success",
+        message: "Message sent successfully. I'll get back to you soon.",
+      });
+      window.localStorage.setItem(LAST_SUBMISSION_KEY, String(Date.now()));
+      form.current.reset();
+      formOpenedAt.current = Date.now();
     } catch (error) {
       console.error("EmailJS send failed:", error);
       setStatus({
@@ -53,11 +132,27 @@ function ContactForm() {
           error?.text || "Failed to send message. Please try again later.",
       });
     } finally {
+      recaptcha.current?.reset();
+      setRecaptchaToken("");
+      isSendingRef.current = false;
       setIsSending(false);
     }
   };
   return (
     <form className="w-full" ref={form} onSubmit={sendEmail}>
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -left-[10000px] h-px w-px overflow-hidden"
+      >
+        <label htmlFor="contact-website">Website</label>
+        <input
+          id="contact-website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
       <div className="space-y-8 sm:space-y-10">
         <div className="border-b border-border pb-3">
           <label
@@ -72,6 +167,8 @@ function ContactForm() {
             type="text"
             autoComplete="name"
             required
+            minLength={2}
+            maxLength={80}
             placeholder="Your name"
             className="w-full bg-transparent py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:placeholder:text-foreground/50"
           />
@@ -90,6 +187,7 @@ function ContactForm() {
             type="email"
             autoComplete="email"
             required
+            maxLength={254}
             placeholder="you@company.com"
             className="w-full bg-transparent py-1 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:placeholder:text-foreground/50"
           />
@@ -107,16 +205,43 @@ function ContactForm() {
             name="message"
             rows={5}
             required
+            minLength={10}
+            maxLength={2000}
             placeholder="Describe your project or opportunity..."
             className="w-full resize-none bg-transparent py-1 text-sm leading-relaxed text-foreground outline-none placeholder:text-muted-foreground focus:placeholder:text-foreground/50"
           />
         </div>
       </div>
 
+      <div className="mt-8 min-h-[78px] overflow-x-auto">
+        {recaptchaSiteKey ? (
+          <ReCAPTCHA
+            ref={recaptcha}
+            sitekey={recaptchaSiteKey}
+            onChange={(token) => {
+              setRecaptchaToken(token || "");
+              if (token) setStatus({ type: "", message: "" });
+            }}
+            onExpired={() => setRecaptchaToken("")}
+            onErrored={() => {
+              setRecaptchaToken("");
+              setStatus({
+                type: "error",
+                message: "reCAPTCHA could not load. Please refresh and try again.",
+              });
+            }}
+          />
+        ) : (
+          <p className="text-sm text-red-500" role="alert">
+            reCAPTCHA is not configured.
+          </p>
+        )}
+      </div>
+
       <button
         type="submit"
         className="mt-10 inline-flex items-center gap-3 bg-primary px-6 py-3.5 text-sm text-primary-foreground transition-opacity hover:opacity-85 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-ring"
-        disabled={isSending}
+        disabled={isSending || !recaptchaToken || !recaptchaSiteKey}
       >
         {isSending ? "Sending..." : "Send Message"}
         <Send size={15} strokeWidth={1.5} />
