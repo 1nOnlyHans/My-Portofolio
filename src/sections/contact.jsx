@@ -8,27 +8,47 @@ import ScrollReveal from "../components/ui/scroll-reveal";
 function ContactForm() {
   const form = useRef(null);
   const [isSending, setIsSending] = useState(false);
+  const [status, setStatus] = useState({ type: "", message: "" });
 
   const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID;
   const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
   const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
-  const sendEmail = (e) => {
+  const sendEmail = async (e) => {
     e.preventDefault();
-    setIsSending(true);
 
-    emailjs
-      .sendForm(serviceId, templateId, form.current, publicKey)
-      .then(() => {
-        alert("Message sent successfully!");
-        form.current.reset();
-      })
-      .catch(() => {
-        alert("Failed to send message. Please try again.");
-      })
-      .finally(() => {
-        setIsSending(false);
+    if (!serviceId || !templateId || !publicKey) {
+      setStatus({
+        type: "error",
+        message:
+          "Email service is not configured for this deployment. Please try again later.",
       });
+      return;
+    }
+
+    setIsSending(true);
+    setStatus({ type: "", message: "" });
+
+    try {
+      await emailjs.sendForm(serviceId, templateId, form.current, {
+        publicKey,
+      });
+
+      setStatus({
+        type: "success",
+        message: "Message sent successfully. I'll get back to you soon.",
+      });
+      form.current.reset();
+    } catch (error) {
+      console.error("EmailJS send failed:", error);
+      setStatus({
+        type: "error",
+        message:
+          error?.text || "Failed to send message. Please try again later.",
+      });
+    } finally {
+      setIsSending(false);
+    }
   };
   return (
     <form className="w-full" ref={form} onSubmit={sendEmail}>
@@ -95,6 +115,17 @@ function ContactForm() {
         {isSending ? "Sending..." : "Send Message"}
         <Send size={15} strokeWidth={1.5} />
       </button>
+      {status.message && (
+        <p
+          role="status"
+          aria-live="polite"
+          className={`mt-4 text-sm ${
+            status.type === "success" ? "text-emerald-500" : "text-red-500"
+          }`}
+        >
+          {status.message}
+        </p>
+      )}
     </form>
   );
 }
