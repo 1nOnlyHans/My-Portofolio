@@ -8,7 +8,7 @@ export default function Projects() {
       className="portfolio-section flex-col items-stretch justify-center"
     >
       <ScrollReveal className="w-full">
-        <span className="section-label"> 01 / Work</span>
+        <span className="section-label"> 02 / Work</span>
         <h2 className="section-title">Selected Projects</h2>
       </ScrollReveal>
       <div className="mt-10 w-full">

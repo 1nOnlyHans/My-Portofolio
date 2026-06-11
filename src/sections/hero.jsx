@@ -84,7 +84,7 @@ function HeroTerminal() {
     { prompt: "hans@portfolio:~", command: "role.txt" },
     { output: "Full-Stack Developer" },
     { prompt: "hans@portfolio:~", command: "ls skills" },
-    { output: "Web Development · UI/UX Design · Video Editing" },
+    { output: "Web Development · UI/UX Design" },
     { prompt: "hans@portfolio:~", command: "pwd" },
     { output: "/Cavite/Philippines" },
   ];
