@@ -30,9 +30,15 @@ function ContactForm() {
     setStatus({ type: "", message: "" });
 
     try {
-      await emailjs.sendForm(serviceId, templateId, form.current, {
-        publicKey,
-      });
+      const formData = new FormData(form.current);
+      const templateParams = {
+        title: "New portfolio contact",
+        user_name: formData.get("user_name"),
+        user_email: formData.get("user_email"),
+        message: formData.get("message"),
+      };
+
+      await emailjs.send(serviceId, templateId, templateParams, { publicKey });
 
       setStatus({
         type: "success",
