@@ -146,7 +146,7 @@
     font-size: var(--font-size);
     scroll-behavior: smooth;
     scroll-padding-top: 4.5rem;
-    scroll-snap-type: y mandatory;
+    scroll-snap-type: y proximity;
   }
 
   h1 {
@@ -194,7 +194,7 @@
 
 @layer components {
   .portfolio-section {
-    @apply relative mx-auto flex w-full max-w-5xl snap-start snap-always items-center px-4 py-12 sm:px-6 sm:py-16 lg:py-20;
+    @apply relative mx-auto flex w-full max-w-5xl snap-start items-center px-4 py-12 sm:px-6 sm:py-16 lg:py-20;
     min-height: calc(100svh - 4.5rem);
     scroll-margin-top: 4.5rem;
   }

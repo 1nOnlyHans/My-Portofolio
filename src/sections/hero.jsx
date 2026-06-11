@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-
+import { ArrowDown } from "lucide-react";
+import ScrollReveal from "../components/ui/scroll-reveal";
 const finalCommand = 'echo "Ready to build something great."';
 
 function HeroName() {
@@ -60,6 +61,16 @@ function HeroName() {
           className="px-5 py-2.5 border border-border text-sm text-muted-foreground hover:text-foreground hover:border-foreground transition-colors"
         >
           Get in touch
+        </a>
+      </div>
+      <div className="my-6">
+        <a
+          href="#about"
+          className="mt-10 flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          style={{ fontFamily: "'DM Mono', monospace" }}
+        >
+          <ArrowDown size={13} />
+          Learn more about me
         </a>
       </div>
     </div>
@@ -182,13 +193,14 @@ function HeroTerminal() {
 }
 export default function Hero() {
   return (
-    <section
-      id="home"
-      className="portfolio-section"
-    >
+    <section id="home" className="portfolio-section">
       <div className="grid w-full gap-10 md:grid-cols-2 md:items-center lg:gap-16">
-        <HeroName />
-        <HeroTerminal />
+        <ScrollReveal direction="right">
+          <HeroName />
+        </ScrollReveal>
+        <ScrollReveal direction="left" delay={0.15}>
+          <HeroTerminal />
+        </ScrollReveal>
       </div>
     </section>
   );

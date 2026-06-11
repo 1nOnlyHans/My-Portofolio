@@ -1,8 +1,16 @@
 import { useEffect, useState } from "react";
 import { Menu, Moon, Sun, X } from "lucide-react";
 
+const menus = [
+  { name: "About", link: "#about" },
+  { name: "Projects", link: "#projects" },
+  { name: "Skills", link: "#skills" },
+  { name: "Contact", link: "#contact" },
+];
+
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
   const [isDark, setIsDark] = useState(() => {
     const savedTheme = localStorage.getItem("theme");
 
@@ -18,12 +26,39 @@ export default function Navbar() {
     localStorage.setItem("theme", isDark ? "dark" : "light");
   }, [isDark]);
 
-  const menus = [
-    { name: "About", link: "#about" },
-    { name: "Projects", link: "#projects" },
-    { name: "Skills", link: "#skills" },
-    { name: "Contact", link: "#contact" },
-  ];
+  useEffect(() => {
+    const sections = ["home", ...menus.map(({ link }) => link.slice(1))]
+      .map((id) => document.getElementById(id))
+      .filter(Boolean);
+    let animationFrame;
+
+    const updateActiveSection = () => {
+      const readingLine = window.innerHeight * 0.45;
+      const currentSection = sections.find((section) => {
+        const bounds = section.getBoundingClientRect();
+        return bounds.top <= readingLine && bounds.bottom > readingLine;
+      });
+
+      if (currentSection) {
+        setActiveSection(currentSection.id);
+      }
+    };
+
+    const handleScroll = () => {
+      cancelAnimationFrame(animationFrame);
+      animationFrame = requestAnimationFrame(updateActiveSection);
+    };
+
+    updateActiveSection();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+
+    return () => {
+      cancelAnimationFrame(animationFrame);
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, []);
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
@@ -44,7 +79,15 @@ export default function Navbar() {
               <li key={menu.name}>
                 <a
                   href={menu.link}
-                  className="font-mono text-muted-foreground transition-colors hover:text-foreground"
+                  aria-current={
+                    activeSection === menu.link.slice(1) ? "page" : undefined
+                  }
+                  onClick={() => setActiveSection(menu.link.slice(1))}
+                  className={`relative font-mono transition-colors after:absolute after:-bottom-2 after:left-0 after:h-px after:bg-accent after:transition-all hover:text-foreground ${
+                    activeSection === menu.link.slice(1)
+                      ? "text-foreground after:w-full"
+                      : "text-muted-foreground after:w-0"
+                  }`}
                   style={{ fontFamily: "'DM Mono', monospace" }}
                 >
                   {menu.name}
@@ -98,8 +141,18 @@ export default function Navbar() {
             <li key={menu.name}>
               <a
                 href={menu.link}
-                onClick={() => setIsMenuOpen(false)}
-                className="block rounded-md px-3 py-3 font-mono text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+                aria-current={
+                  activeSection === menu.link.slice(1) ? "page" : undefined
+                }
+                onClick={() => {
+                  setActiveSection(menu.link.slice(1));
+                  setIsMenuOpen(false);
+                }}
+                className={`block rounded-md border-l-2 px-3 py-3 font-mono transition-colors hover:bg-secondary hover:text-foreground ${
+                  activeSection === menu.link.slice(1)
+                    ? "border-accent bg-secondary text-foreground"
+                    : "border-transparent text-muted-foreground"
+                }`}
                 style={{ fontFamily: "'DM Mono', monospace" }}
               >
                 {menu.name}

@@ -14,11 +14,11 @@ function App() {
       <div className="mx-auto min-h-screen w-full max-w-5xl pt-18">
         <Navbar />
         <main className="scroll-sections">
-          <Hero />
-          <About />
-          <Projects />
-          <Skills />
-          <Contact />
+          <Hero id="hero" />
+          <About id="about" />
+          <Projects id="projects" />
+          <Skills id="skills" />
+          <Contact id="contact" />
         </main>
         <Footer />
         <ScrollToTop />
