@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { ArrowDown, ArrowUp, Plus, Trash2, Upload } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowDown, ArrowUp, Image as ImageIcon, Plus, Trash2, Upload, X } from "lucide-react";
 import { defaults, fetchContent } from "@/lib/content";
 
 const box = "w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent";
@@ -66,17 +66,86 @@ function UploadButton({ onUploaded, multiple }) {
   );
 }
 
+// pick from images already uploaded (Media tab); multiple = tick several, then confirm
+function MediaPicker({ onPick, multiple }) {
+  const ref = useRef(null);
+  const [files, setFiles] = useState(null);
+  const [chosen, setChosen] = useState([]);
+
+  const open = () => {
+    setChosen([]);
+    setFiles(null);
+    ref.current.showModal();
+    fetch("/api/upload")
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setFiles);
+  };
+  const done = (urls) => {
+    ref.current.close();
+    onPick(urls);
+  };
+  const click = (url) =>
+    multiple
+      ? setChosen((c) => (c.includes(url) ? c.filter((u) => u !== url) : [...c, url]))
+      : done([url]);
+
+  return (
+    <>
+      <button type="button" className={btn} onClick={open}>
+        <ImageIcon size={14} className="mr-1 inline" /> Choose from Media
+      </button>
+      <dialog
+        ref={ref}
+        onClick={(e) => e.target === ref.current && ref.current.close()}
+        className="m-auto w-[min(48rem,94vw)] border border-border bg-background p-4 text-foreground backdrop:bg-black/60"
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-sm">Choose from Media</h3>
+          <button type="button" className={btn} onClick={() => ref.current.close()} aria-label="Close">
+            <X size={14} />
+          </button>
+        </div>
+        {!files && <p className="text-sm">Loading…</p>}
+        {files && !files.length && (
+          <p className="text-sm text-muted-foreground">No uploaded images yet. Use Upload first.</p>
+        )}
+        <div className="grid max-h-[60vh] grid-cols-3 gap-3 overflow-y-auto sm:grid-cols-4">
+          {files?.map((f) => (
+            <button
+              key={f.url}
+              type="button"
+              onClick={() => click(f.url)}
+              aria-pressed={chosen.includes(f.url)}
+              className={`border p-1 ${chosen.includes(f.url) ? "border-accent ring-2 ring-accent" : "border-border hover:border-accent"}`}
+            >
+              <img src={f.url} alt="" className="aspect-[3/4] w-full object-cover" />
+            </button>
+          ))}
+        </div>
+        {multiple && (
+          <div className="mt-4">
+            <button type="button" className={btn} disabled={!chosen.length} onClick={() => done(chosen)}>
+              Add {chosen.length || ""} selected
+            </button>
+          </div>
+        )}
+      </dialog>
+    </>
+  );
+}
+
 function ImageField({ label, value, onChange }) {
   return (
     <div className="space-y-2">
       <span className="text-xs uppercase tracking-widest text-muted-foreground" style={mono}>{label}</span>
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         {value ? (
           <img src={value} alt="" className="h-24 w-20 border border-border object-cover" />
         ) : (
           <span className="text-sm text-muted-foreground">Using bundled image</span>
         )}
         <UploadButton onUploaded={([url]) => onChange(url)} />
+        <MediaPicker onPick={([url]) => onChange(url)} />
         {value && <button type="button" className={btn} onClick={() => onChange("")}>Use default</button>}
       </div>
     </div>
@@ -104,7 +173,13 @@ function PhotoList({ value, onChange }) {
           </div>
         ))}
       </div>
-      <UploadButton multiple onUploaded={(urls) => onChange([...value, ...urls])} />
+      <div className="flex flex-wrap items-center gap-3">
+        <UploadButton multiple onUploaded={(urls) => onChange([...value, ...urls])} />
+        <MediaPicker
+          multiple
+          onPick={(urls) => onChange([...value, ...urls.filter((u) => !value.includes(u))])}
+        />
+      </div>
     </div>
   );
 }
