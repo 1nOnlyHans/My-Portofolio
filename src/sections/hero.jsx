@@ -1,55 +1,54 @@
 import { useState, useRef, useEffect } from "react";
 import { ArrowDown } from "lucide-react";
 import ScrollReveal from "../components/ui/scroll-reveal";
-const finalCommand = 'echo "Ready to build something great."';
+import { useContent } from "../lib/content";
+import heroLight from "../assets/images/hans hero light.jpg";
+import heroDark from "../assets/images/hans hero dark.jpg";
 
 function HeroName() {
+  const p = useContent("profile");
   return (
-    <div className="max-w-3xl space-y-6">
-      <span className="block text-sm text-mono uppercase text-muted-foreground font-light tracking-widest">
-        FULL-STACK DEVELOPER &bull; CAVITE
+    <div className="space-y-8">
+      <span
+        className="flex items-center gap-3 text-xs uppercase tracking-[0.3em] text-muted-foreground"
+        style={{ fontFamily: "'DM Mono', monospace" }}
+      >
+        <span className="h-px w-10 bg-accent" />
+        {p.tagline}
       </span>
 
-      <div className="flex items-center gap-5 sm:gap-7">
-        <h1
-          className="shrink-0"
-          style={{
-            fontFamily: "'Playfair Display', serif",
-            fontSize: "clamp(3rem, 6vw, 5.5rem)",
-            fontWeight: 400,
-            lineHeight: 1.05,
-            letterSpacing: "-0.02em",
-            color: "var(--foreground)",
-          }}
+      <h1
+        aria-label={`${p.firstName} ${p.lastName}`}
+        style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: "clamp(4rem, 11vw, 8.5rem)",
+          fontWeight: 400,
+          lineHeight: 0.88,
+          letterSpacing: "-0.04em",
+          color: "var(--foreground)",
+        }}
+      >
+        <span className="block">{p.firstName}</span>
+        <span
+          className="block pl-[0.55em]"
+          style={{ fontStyle: "italic", color: "var(--accent)" }}
         >
-          Hans
-          <br />
-          <span
-            style={{ fontStyle: "italic", color: "var(--muted-foreground)" }}
-          >
-            Diaz
-          </span>
-        </h1>
-      </div>
+          {p.lastName}
+        </span>
+      </h1>
 
       <p
         className="text-muted-foreground"
         style={{
-          fontFamily: "'Inter', sans-serif",
           fontWeight: 300,
           lineHeight: 1.75,
-          fontSize: "1rem",
-          maxWidth: "420px",
+          maxWidth: "26rem",
         }}
       >
-        I build web applications that are not only functional but also visually
-        appealing. With a strong foundation in both front-end and back-end
-        technologies, I am passionate about creating seamless user experiences
-        and efficient solutions. Whether it's crafting responsive interfaces or
-        optimizing server-side performance, I am dedicated to delivering
-        high-quality results that exceed expectations.
+        {p.intro}
       </p>
-      <div className="flex flex-center gap-3 items-center">
+
+      <div className="flex flex-wrap items-center gap-3">
         <a
           href="#projects"
           className="px-5 py-2.5 bg-foreground text-background text-sm hover:opacity-80 transition-opacity"
@@ -62,89 +61,174 @@ function HeroName() {
         >
           Get in touch
         </a>
-      </div>
-      <div className="my-6">
         <a
           href="#about"
-          className="mt-10 flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          className="ml-2 flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
           style={{ fontFamily: "'DM Mono', monospace" }}
         >
           <ArrowDown size={13} />
-          Learn more about me
+          About me
         </a>
       </div>
     </div>
   );
 }
 
-function HeroTerminal() {
-  const commandLines = [
-    { prompt: "hans@portfolio:~", command: "whoami" },
-    { output: "Hans Diaz — Full-Stack Web Developer" },
-    { prompt: "hans@portfolio:~", command: "role.txt" },
-    { output: "Full-Stack Developer" },
-    { prompt: "hans@portfolio:~", command: "ls skills" },
-    { output: "Web Development · UI/UX Design" },
-    { prompt: "hans@portfolio:~", command: "pwd" },
-    { output: "/Cavite/Philippines" },
-  ];
+function HeroPortrait() {
+  const corner = "absolute h-5 w-5 border-accent";
+  return (
+    <figure className="relative">
+      <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
+        {/* theme-reactive: only the visible one is fetched (lazy + display:none) */}
+        {[
+          [heroLight, "block dark:hidden", "Hans Diaz smiling, wearing glasses"],
+          [heroDark, "hidden dark:block", ""],
+        ].map(([src, show, alt]) => (
+          <img
+            key={src}
+            src={src}
+            alt={alt}
+            loading="lazy"
+            decoding="async"
+            className={`${show} h-full w-full object-cover`}
+            style={{ objectPosition: "50% 30%" }}
+          />
+        ))}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to top, rgba(10,16,28,0.75), transparent 45%)",
+          }}
+        />
+      </div>
+      {/* crop marks */}
+      <span className={`${corner} -left-3 -top-3 border-l border-t`} />
+      <span className={`${corner} -right-3 -top-3 border-r border-t`} />
+      <span className={`${corner} -right-3 -bottom-3 border-b border-r`} />
+      <figcaption
+        className="mt-4 flex justify-between text-[0.7rem] uppercase tracking-widest text-muted-foreground lg:justify-end lg:gap-6"
+        style={{ fontFamily: "'DM Mono', monospace" }}
+      >
+        <span>Fig. 01 — Hans Diaz</span>
+        <span>14.28°N 120.87°E</span>
+      </figcaption>
+    </figure>
+  );
+}
 
-  const [visibleLines, setVisibleLines] = useState(0);
-  const [typedCommand, setTypedCommand] = useState("");
+const PROMPT = "hans@portfolio:~";
 
-  const intervalRef = useRef(setTimeout(() => {}, 0));
+const commands = {
+  help: () =>
+    "Commands: help, whoami, role, skills, pwd, about, projects, contact, echo <text>, date, clear",
+  whoami: () => "Hans Diaz — Full-Stack Web Developer",
+  role: () => "Full-Stack Developer",
+  skills: () => "Web Development · UI/UX Design",
+  ls: (arg) => (arg === "skills" ? "Web Development · UI/UX Design" : "skills  projects  about  contact"),
+  pwd: () => "/Cavite/Philippines",
+  date: () => new Date().toString(),
+  echo: (arg) => arg.replace(/^["']|["']$/g, ""),
+  about: () => go("about"),
+  projects: () => go("projects"),
+  contact: () => go("contact"),
+};
+
+function go(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  return `Scrolling to ${id}...`;
+}
+
+function HeroTerminal({ onClose }) {
+  const [lines, setLines] = useState([
+    { output: 'Welcome. Type "help" to see available commands.' },
+  ]);
+  const [input, setInput] = useState("");
+  const [history, setHistory] = useState([]);
+  const [cursor, setCursor] = useState(-1);
+  const inputRef = useRef(null);
+  const bodyRef = useRef(null);
 
   useEffect(() => {
-    let i = 0;
-    const tick = () => {
-      i++;
-      setVisibleLines(i);
-      if (i < commandLines.length) {
-        intervalRef.current = setTimeout(tick, i % 2 === 0 ? 300 : 80);
-      }
-    };
-    intervalRef.current = setTimeout(tick, 500);
-    return () => clearTimeout(intervalRef.current);
-  }, [commandLines.length]);
+    // scroll the terminal body only, not the page
+    bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight });
+  }, [lines]);
+
+  const run = (raw) => {
+    const [name, ...rest] = raw.trim().split(/\s+/);
+    const arg = rest.join(" ");
+    if (name === "clear") return setLines([]);
+    const fn = commands[name];
+    const output = !name
+      ? null
+      : fn
+        ? fn(arg)
+        : `command not found: ${name}. Type "help".`;
+    setLines((l) => [...l, { command: raw }, ...(output ? [{ output }] : [])]);
+  };
+
+  const [typing, setTyping] = useState(true);
 
   useEffect(() => {
-    if (visibleLines < commandLines.length) return;
-
-    let characterIndex = 0;
-    const typingInterval = setInterval(() => {
-      characterIndex++;
-      setTypedCommand(finalCommand.slice(0, characterIndex));
-
-      if (characterIndex === finalCommand.length) {
-        clearInterval(typingInterval);
+    // intro: auto-type one command, then hand over to the visitor
+    const intro = "whoami";
+    let n = 0;
+    const id = setInterval(() => {
+      n++;
+      setInput(intro.slice(0, n));
+      if (n === intro.length) {
+        clearInterval(id);
+        setTimeout(() => {
+          run(intro);
+          setInput("");
+          setTyping(false);
+        }, 300);
       }
-    }, 55);
+    }, 90);
+    return () => clearInterval(id);
+  }, []);
 
-    return () => clearInterval(typingInterval);
-  }, [visibleLines, commandLines.length]);
+  const onKeyDown = (e) => {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      const hits = [...Object.keys(commands), "clear"].filter(
+        (c) => input && c.startsWith(input),
+      );
+      if (hits.length === 1) setInput(hits[0]);
+    } else if (e.key === "Enter") {
+      run(input);
+      if (input.trim()) setHistory((h) => [...h, input]);
+      setInput("");
+      setCursor(-1);
+    } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      e.preventDefault();
+      const next = Math.max(
+        -1,
+        Math.min(history.length - 1, cursor + (e.key === "ArrowUp" ? 1 : -1)),
+      );
+      setCursor(next);
+      setInput(next < 0 ? "" : history[history.length - 1 - next]);
+    }
+  };
 
   return (
     <div
       className="rounded-sm border border-border overflow-hidden"
       style={{ background: "var(--card)" }}
     >
-      {/* Terminal title bar */}
       <div
         className="flex items-center gap-2 px-4 py-3 border-b border-border"
         style={{ background: "var(--secondary)" }}
       >
-        <span
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close terminal"
           className="w-3 h-3 rounded-full"
           style={{ background: "#FF5F57" }}
         />
-        <span
-          className="w-3 h-3 rounded-full"
-          style={{ background: "#FEBC2E" }}
-        />
-        <span
-          className="w-3 h-3 rounded-full"
-          style={{ background: "#28C840" }}
-        />
+        <span className="w-3 h-3 rounded-full" style={{ background: "#FEBC2E" }} />
+        <span className="w-3 h-3 rounded-full" style={{ background: "#28C840" }} />
         <span
           className="ml-auto text-xs text-muted-foreground"
           style={{ fontFamily: "'DM Mono', monospace" }}
@@ -152,55 +236,101 @@ function HeroTerminal() {
           zsh — 80×24
         </span>
       </div>
-      {/* Terminal body */}
       <div
-        className="p-5 min-h-64"
+        ref={bodyRef}
+        className="p-5 h-[min(26rem,60vh)] overflow-y-auto cursor-text"
+        onClick={() => inputRef.current?.focus()}
         style={{
           fontFamily: "'DM Mono', monospace",
-          fontSize: "0.82rem",
+          fontSize: "0.92rem",
           lineHeight: 1.8,
         }}
       >
-        {commandLines.map((line, index) => (
-          <div
-            key={index}
-            className={`whitespace-pre-wrap ${
-              index < visibleLines ? "opacity-100" : "opacity-0"
-            } transition-opacity duration-500`}
-          >
-            {line.prompt && (
-              <span className="text-green-500">{line.prompt} </span>
+        {lines.map((line, i) => (
+          <div key={i} className="whitespace-pre-wrap">
+            {line.command !== undefined && (
+              <>
+                <span className="text-green-500">{PROMPT} </span>
+                <span>{line.command}</span>
+              </>
             )}
-            {line.command && <span>{line.command}</span>}
             {line.output && (
               <div className="ml-4 text-muted-foreground">{line.output}</div>
             )}
           </div>
         ))}
-        <div
-          className={`whitespace-pre-wrap transition-opacity duration-300 ${
-            visibleLines === commandLines.length ? "opacity-100" : "opacity-0"
-          }`}
-          aria-label={`Terminal prompt ${typedCommand}`}
-        >
-          <span className="text-green-500">hans@portfolio:~ </span>
-          <span>{typedCommand}</span>
-          <span className="terminal-cursor" aria-hidden="true" />
-        </div>
+        <label className="flex gap-2">
+          <span className="text-green-500 shrink-0">{PROMPT}</span>
+          <input
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={onKeyDown}
+            readOnly={typing}
+            autoFocus
+            aria-label="Terminal command input"
+            autoComplete="off"
+            autoCapitalize="off"
+            spellCheck={false}
+            className="flex-1 min-w-0 bg-transparent outline-none caret-foreground"
+            style={{ font: "inherit" }}
+          />
+        </label>
       </div>
     </div>
   );
 }
+function TerminalModal() {
+  const dialogRef = useRef(null);
+  const [open, setOpen] = useState(false);
+
+  const show = () => {
+    setOpen(true);
+    dialogRef.current?.showModal();
+  };
+  const close = () => dialogRef.current?.close();
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={show}
+        className="group flex items-center gap-3 border border-border bg-background/80 px-4 py-3 text-xs uppercase tracking-widest text-foreground backdrop-blur-md transition-colors hover:border-accent hover:text-accent"
+        style={{ fontFamily: "'DM Mono', monospace" }}
+      >
+        <span className="text-green-500">&gt;_</span>
+        Open terminal
+      </button>
+      <dialog
+        ref={dialogRef}
+        onClose={() => setOpen(false)}
+        onClick={(e) => e.target === dialogRef.current && close()}
+        className="m-auto w-[min(44rem,94vw)] bg-transparent p-0 text-foreground backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+      >
+        {/* mount only while open so the intro replays each time */}
+        {open && <HeroTerminal onClose={close} />}
+      </dialog>
+    </>
+  );
+}
+
 export default function Hero() {
   return (
     <section id="home" className="portfolio-section">
-      <div className="grid w-full gap-10 md:grid-cols-2 md:items-center lg:gap-16">
-        <ScrollReveal direction="right">
-          <HeroName />
-        </ScrollReveal>
-        <ScrollReveal direction="left" delay={0.15}>
-          <HeroTerminal />
-        </ScrollReveal>
+      <div className="grid w-full items-center gap-12 lg:grid-cols-12 lg:gap-0">
+        <div className="lg:col-span-7">
+          <ScrollReveal direction="right">
+            <HeroName />
+          </ScrollReveal>
+        </div>
+        <div className="relative lg:col-span-5">
+          <ScrollReveal direction="left" delay={0.15}>
+            <HeroPortrait />
+            <div className="mt-8 lg:absolute lg:bottom-16 lg:-left-16 lg:z-10 lg:mt-0">
+              <TerminalModal />
+            </div>
+          </ScrollReveal>
+        </div>
       </div>
     </section>
   );

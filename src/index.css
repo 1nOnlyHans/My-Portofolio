@@ -146,7 +146,6 @@
     font-size: var(--font-size);
     scroll-behavior: smooth;
     scroll-padding-top: 4.5rem;
-    scroll-snap-type: y proximity;
   }
 
   h1 {
@@ -194,7 +193,7 @@
 
 @layer components {
   .portfolio-section {
-    @apply relative mx-auto flex w-full max-w-5xl snap-start items-center px-4 py-12 sm:px-6 sm:py-16 lg:py-20;
+    @apply relative mx-auto flex w-full max-w-5xl items-center px-4 py-12 sm:px-6 sm:py-16 lg:py-20;
     min-height: calc(100svh - 4.5rem);
     scroll-margin-top: 4.5rem;
   }
@@ -211,13 +210,27 @@
   }
 
   .section-label {
-    @apply mb-4 block font-mono text-sm font-light uppercase tracking-widest text-muted-foreground;
+    @apply mb-4 flex items-center gap-3 font-mono text-xs font-light uppercase tracking-[0.3em] text-muted-foreground;
+  }
+
+  .section-label::before {
+    width: 2.5rem;
+    height: 1px;
+    content: "";
+    background: var(--accent);
   }
 
   .section-title {
-    @apply text-4xl tracking-tight text-foreground sm:text-5xl;
+    @apply text-4xl text-foreground sm:text-5xl lg:text-6xl;
     font-family: "Playfair Display", serif;
     font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+
+  .section-title em {
+    font-style: italic;
+    color: var(--accent);
   }
 
   .terminal-cursor {
@@ -246,7 +259,6 @@
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-    scroll-snap-type: none;
   }
 
   .terminal-cursor {

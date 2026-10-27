@@ -4,6 +4,7 @@ import { Menu, Moon, Sun, X } from "lucide-react";
 const menus = [
   { name: "About", link: "#about" },
   { name: "Projects", link: "#projects" },
+  { name: "Activity", link: "#activity" },
   { name: "Skills", link: "#skills" },
   { name: "Contact", link: "#contact" },
 ];
@@ -60,106 +61,114 @@ export default function Navbar() {
     };
   }, []);
 
+  const linkBase =
+    "rounded-full px-3.5 py-1.5 font-mono text-sm transition-colors duration-300";
+
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md">
-      <nav className="mx-auto flex h-18 w-full max-w-5xl items-center justify-between px-4 sm:px-6">
-        <a
-          href="#"
-          className="font-mono text-sm tracking-widest text-muted-foreground transition-colors hover:text-foreground sm:text-base"
-          style={{ fontFamily: "'DM Mono', monospace" }}
-        >
-          {
-            "<hansDev />"
-          }
-        </a>
-
-        <div className="flex items-center gap-3">
-          <ul className="hidden items-center gap-5 md:flex">
-            {menus.map((menu) => (
-              <li key={menu.name}>
-                <a
-                  href={menu.link}
-                  aria-current={
-                    activeSection === menu.link.slice(1) ? "page" : undefined
-                  }
-                  onClick={() => setActiveSection(menu.link.slice(1))}
-                  className={`relative font-mono transition-colors after:absolute after:-bottom-2 after:left-0 after:h-px after:bg-accent after:transition-all hover:text-foreground ${
-                    activeSection === menu.link.slice(1)
-                      ? "text-foreground after:w-full"
-                      : "text-muted-foreground after:w-0"
-                  }`}
-                  style={{ fontFamily: "'DM Mono', monospace" }}
-                >
-                  {menu.name}
-                </a>
-              </li>
-            ))}
-          </ul>
-
-          <button
-            type="button"
-            role="switch"
-            aria-checked={isDark}
-            aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
-            onClick={() => setIsDark((currentTheme) => !currentTheme)}
-            className="relative flex h-7 w-14 items-center rounded-full bg-secondary p-1 text-muted-foreground ring-1 ring-border transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+    <header className="pointer-events-none fixed inset-x-0 top-3 z-50 px-3 sm:top-4 sm:px-4">
+      <div className="pointer-events-auto mx-auto w-full max-w-3xl">
+        <nav className="flex h-13 items-center justify-between rounded-full border border-border bg-background/55 pl-5 pr-2 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+          <a
+            href="#"
+            className="font-mono text-sm tracking-widest text-muted-foreground transition-colors hover:text-accent"
+            style={{ fontFamily: "'DM Mono', monospace" }}
           >
-            <Sun className="absolute left-1.5 size-3.5" aria-hidden="true" />
-            <Moon className="absolute right-1.5 size-3.5" aria-hidden="true" />
-            <span
-              className={`z-10 size-5 rounded-full bg-foreground shadow-sm transition-transform duration-200 ${
-                isDark ? "translate-x-7" : "translate-x-0"
-              }`}
-            />
-          </button>
+            {"<hansDev />"}
+          </a>
 
-          <button
-            type="button"
-            aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-            aria-expanded={isMenuOpen}
-            aria-controls="mobile-navigation"
-            onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
-            className="flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:hidden"
-          >
-            {isMenuOpen ? (
-              <X className="size-5" aria-hidden="true" />
-            ) : (
-              <Menu className="size-5" aria-hidden="true" />
-            )}
-          </button>
-        </div>
-      </nav>
+          <div className="flex items-center gap-2">
+            <ul className="hidden items-center gap-1 md:flex">
+              {menus.map((menu) => {
+                const active = activeSection === menu.link.slice(1);
+                return (
+                  <li key={menu.name}>
+                    <a
+                      href={menu.link}
+                      aria-current={active ? "page" : undefined}
+                      onClick={() => setActiveSection(menu.link.slice(1))}
+                      className={`${linkBase} hover:text-foreground ${
+                        active
+                          ? "bg-foreground/10 text-foreground"
+                          : "text-muted-foreground"
+                      }`}
+                      style={{ fontFamily: "'DM Mono', monospace" }}
+                    >
+                      {menu.name}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
 
-      <div
-        id="mobile-navigation"
-        className={`overflow-hidden border-border bg-background/95 transition-all duration-300 md:hidden ${
-          isMenuOpen ? "max-h-72 border-t opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <ul className="mx-auto flex w-full max-w-5xl flex-col px-4 py-3 sm:px-6">
-          {menus.map((menu) => (
-            <li key={menu.name}>
-              <a
-                href={menu.link}
-                aria-current={
-                  activeSection === menu.link.slice(1) ? "page" : undefined
-                }
-                onClick={() => {
-                  setActiveSection(menu.link.slice(1));
-                  setIsMenuOpen(false);
-                }}
-                className={`block rounded-md border-l-2 px-3 py-3 font-mono transition-colors hover:bg-secondary hover:text-foreground ${
-                  activeSection === menu.link.slice(1)
-                    ? "border-accent bg-secondary text-foreground"
-                    : "border-transparent text-muted-foreground"
+            <button
+              type="button"
+              role="switch"
+              aria-checked={isDark}
+              aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+              onClick={() => setIsDark((currentTheme) => !currentTheme)}
+              className="relative flex h-8 w-14 items-center rounded-full bg-secondary/70 p-1 text-muted-foreground ring-1 ring-border transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            >
+              <Sun className="absolute left-1.5 size-3.5" aria-hidden="true" />
+              <Moon className="absolute right-1.5 size-3.5" aria-hidden="true" />
+              <span
+                className={`z-10 size-6 rounded-full bg-foreground shadow-sm transition-transform duration-200 ${
+                  isDark ? "translate-x-6" : "translate-x-0"
                 }`}
-                style={{ fontFamily: "'DM Mono', monospace" }}
-              >
-                {menu.name}
-              </a>
-            </li>
-          ))}
-        </ul>
+              />
+            </button>
+
+            <button
+              type="button"
+              aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-navigation"
+              onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
+              className="flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:hidden"
+            >
+              {isMenuOpen ? (
+                <X className="size-5" aria-hidden="true" />
+              ) : (
+                <Menu className="size-5" aria-hidden="true" />
+              )}
+            </button>
+          </div>
+        </nav>
+
+        <div
+          id="mobile-navigation"
+          inert={!isMenuOpen}
+          className={`mt-2 origin-top overflow-hidden rounded-3xl border border-border bg-background/70 backdrop-blur-xl transition-all duration-300 md:hidden ${
+            isMenuOpen
+              ? "max-h-80 scale-100 opacity-100"
+              : "max-h-0 scale-95 border-transparent opacity-0"
+          }`}
+        >
+          <ul className="flex flex-col gap-1 p-2">
+            {menus.map((menu) => {
+              const active = activeSection === menu.link.slice(1);
+              return (
+                <li key={menu.name}>
+                  <a
+                    href={menu.link}
+                    aria-current={active ? "page" : undefined}
+                    onClick={() => {
+                      setActiveSection(menu.link.slice(1));
+                      setIsMenuOpen(false);
+                    }}
+                    className={`block ${linkBase} py-2.5 hover:text-foreground ${
+                      active
+                        ? "bg-foreground/10 text-foreground"
+                        : "text-muted-foreground"
+                    }`}
+                    style={{ fontFamily: "'DM Mono', monospace" }}
+                  >
+                    {menu.name}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </div>
     </header>
   );

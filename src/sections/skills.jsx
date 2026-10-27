@@ -1,11 +1,12 @@
 import ScrollReveal from "../components/ui/scroll-reveal";
+import { useContent } from "../lib/content";
 
 function SkillBar({ name, level }) {
   return (
-    <div className="py-3 border-b border-border last:border-0">
-      <div className="flex items-center justify-between mb-2">
+    <div className="group border-b border-border py-3 last:border-0">
+      <div className="mb-2 flex items-center justify-between">
         <span
-          className="text-sm"
+          className="text-sm transition-colors group-hover:text-accent"
           style={{
             fontFamily: "'Inter', sans-serif",
             fontWeight: 400,
@@ -24,7 +25,7 @@ function SkillBar({ name, level }) {
       <div className="h-px bg-border w-full relative overflow-hidden">
         <div
           className="h-full absolute top-0 left-0"
-          style={{ width: `${level}%`, background: "var(--foreground)" }}
+          style={{ width: `${level}%`, background: "var(--accent)" }}
         />
       </div>
     </div>
@@ -32,60 +33,45 @@ function SkillBar({ name, level }) {
 }
 
 export default function Skills() {
-  const skills = [
-    {
-      frontend: [
-        {
-          ReactJS: 80,
-          VueJS: 90,
-          HTML: 95,
-          CSS: 90,
-          JavaScript: 85,
-        },
-      ],
-    },
-    {
-      backend: [
-        {
-          PHP: 85,
-          Laravel: 80,
-          MySQL: 90,
-          "Restful APIs": 85,
-        },
-      ],
-    },
-    {
-      databases: [
-        {
-          MySQL: 90,
-          PostgreSQL: 85,
-        },
-      ],
-    },
-  ];
+  const skills = useContent("skills");
   return (
     <section
       id="skills"
       className="portfolio-section flex-col items-stretch justify-center"
     >
       <ScrollReveal className="w-full">
-        <span className="section-label">03 / Skills</span>
-        <h2 className="section-title">My Technical Expertise</h2>
+        <span className="section-label">04 / Skills</span>
+        <h2 className="section-title">
+          My Technical <em>Expertise</em>
+        </h2>
       </ScrollReveal>
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="mt-12 grid grid-cols-1 gap-x-10 gap-y-12 md:grid-cols-3">
         {skills.map((category, index) => {
-          const categoryName = Object.keys(category)[0];
-          const skillSet = category[categoryName][0];
           return (
-            <ScrollReveal key={index} delay={index * 0.12}>
-              <h3
-                className="mb-4 text-sm uppercase text-muted-foreground tracking-widest"
+            <ScrollReveal
+              key={index}
+              delay={index * 0.12}
+              className="border-t border-border pt-5"
+            >
+              <span
+                className="text-xs tracking-widest text-accent"
                 style={{ fontFamily: "'DM Mono', monospace" }}
               >
-                {categoryName}
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <h3
+                className="mb-5 mt-2 text-3xl capitalize text-foreground"
+                style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontWeight: 400,
+                  fontStyle: "italic",
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                {category.category}
               </h3>
-              {Object.entries(skillSet).map(([skill, level], idx) => (
-                <SkillBar key={idx} name={skill} level={level} />
+              {category.items.map(({ name, level }, idx) => (
+                <SkillBar key={idx} name={name} level={level} />
               ))}
             </ScrollReveal>
           );

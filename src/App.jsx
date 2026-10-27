@@ -6,6 +6,7 @@ import About from "./sections/about";
 import Contact from "./sections/contact";
 import Projects from "./sections/projects";
 import Skills from "./sections/skills";
+import Activity from "./sections/activity";
 import "./App.css";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Hero id="hero" />
           <About id="about" />
           <Projects id="projects" />
+          <Activity id="activity" />
           <Skills id="skills" />
           <Contact id="contact" />
         </main>

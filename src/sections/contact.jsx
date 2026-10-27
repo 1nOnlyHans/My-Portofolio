@@ -1,4 +1,4 @@
-import { ArrowUpRight, Send } from "lucide-react";
+import { ArrowUpRight, Briefcase, Send } from "lucide-react";
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 import { SiGmail } from "react-icons/si";
 import emailjs from "@emailjs/browser";
@@ -154,10 +154,10 @@ function ContactForm() {
         />
       </div>
       <div className="space-y-8 sm:space-y-10">
-        <div className="border-b border-border pb-3">
+        <div className="border-b border-border pb-3 transition-colors focus-within:border-accent">
           <label
             htmlFor="contact-name"
-            className="mb-2 block font-mono text-xs font-normal tracking-widest text-muted-foreground"
+            className="mb-2 block font-mono text-xs font-normal uppercase tracking-widest text-muted-foreground"
           >
             Name
           </label>
@@ -174,10 +174,10 @@ function ContactForm() {
           />
         </div>
 
-        <div className="border-b border-border pb-3">
+        <div className="border-b border-border pb-3 transition-colors focus-within:border-accent">
           <label
             htmlFor="contact-email"
-            className="mb-2 block font-mono text-xs font-normal tracking-widest text-muted-foreground"
+            className="mb-2 block font-mono text-xs font-normal uppercase tracking-widest text-muted-foreground"
           >
             Email
           </label>
@@ -193,10 +193,10 @@ function ContactForm() {
           />
         </div>
 
-        <div className="border-b border-border pb-3">
+        <div className="border-b border-border pb-3 transition-colors focus-within:border-accent">
           <label
             htmlFor="contact-message"
-            className="mb-2 block font-mono text-xs font-normal tracking-widest text-muted-foreground"
+            className="mb-2 block font-mono text-xs font-normal uppercase tracking-widest text-muted-foreground"
           >
             Message
           </label>
@@ -275,6 +275,12 @@ export default function Contact() {
       Icon: FaLinkedin,
     },
     {
+      label: "OnlineJobs",
+      handle: "onlinejobs.ph/jobseekers/info/5490624",
+      href: "https://v2.onlinejobs.ph/jobseekers/info/5490624",
+      Icon: Briefcase,
+    },
+    {
       label: "Email",
       handle: "hansdiaz2356@gmail.com",
       href: "mailto:hansdiaz2356@gmail.com",
@@ -288,8 +294,8 @@ export default function Contact() {
       className="portfolio-section grid grid-cols-1 items-start gap-10 md:grid-cols-2"
     >
       <ScrollReveal className="w-full" direction="right">
-        <span className="section-label">04 / Contact</span>
-        <h2 className="section-title">Have a project in mind?</h2>
+        <span className="section-label">05 / Contact</span>
+        <h2 className="section-title">Have a project <em>in mind?</em></h2>
         <p
           className="mt-6 text-muted-foreground mb-10"
           style={{
@@ -303,18 +309,29 @@ export default function Contact() {
           collaboration. If you want to build something fast, clean, and
           production-ready — let's talk.
         </p>
-        <div className="mt-6 flex flex-col space-y-4">
+        <div className="mt-6 flex flex-col border-b border-border">
           {socials.map(({ label, handle, href, Icon }) => (
             <a
               key={label}
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 text-sm text-muted-foreground transition-colors hover:text-primary"
+              className="group flex items-center gap-4 border-t border-border py-4 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:text-foreground"
             >
-              <Icon size={18} />
-              <span>{handle}</span>
-              <ArrowUpRight size={14} className="ml-auto" />
+              <Icon size={16} className="shrink-0" />
+              <span
+                className="w-20 shrink-0 text-xs uppercase tracking-widest"
+                style={{ fontFamily: "'DM Mono', monospace" }}
+              >
+                {label}
+              </span>
+              <span className="min-w-0 truncate transition-transform duration-300 group-hover:translate-x-1 group-hover:text-accent">
+                {handle}
+              </span>
+              <ArrowUpRight
+                size={14}
+                className="ml-auto shrink-0 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-accent"
+              />
             </a>
           ))}
         </div>

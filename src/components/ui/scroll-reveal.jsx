@@ -1,11 +1,16 @@
 import { motion, useReducedMotion } from "framer-motion";
 
 const directions = {
-  up: { x: 0, y: 28 },
-  down: { x: 0, y: -28 },
-  left: { x: 28, y: 0 },
-  right: { x: -28, y: 0 },
+  up: { x: 0, y: 40 },
+  down: { x: 0, y: -40 },
+  left: { x: 40, y: 0 },
+  right: { x: -40, y: 0 },
 };
+
+// Only opacity + transform animate, so the compositor does the work.
+// `margin` fires the reveal as an edge enters the viewport; a fractional
+// `amount` made tall sections wait until they were mostly on screen.
+const viewport = { once: true, margin: "0px 0px -12% 0px" };
 
 export default function ScrollReveal({
   children,
@@ -21,10 +26,12 @@ export default function ScrollReveal({
   return (
     <MotionElement
       className={className}
-      initial={reduceMotion ? false : { opacity: 0, ...offset }}
-      whileInView={reduceMotion ? undefined : { opacity: 1, x: 0, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
+      initial={reduceMotion ? false : { opacity: 0, scale: 0.97, ...offset }}
+      whileInView={
+        reduceMotion ? undefined : { opacity: 1, scale: 1, x: 0, y: 0 }
+      }
+      viewport={viewport}
+      transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
     >
       {children}
     </MotionElement>
