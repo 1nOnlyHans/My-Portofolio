@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus, Trash2, Upload } from "lucide-react";
 import { defaults, fetchContent } from "@/lib/content";
 
 const box = "w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent";
@@ -13,6 +13,136 @@ const api = (url, method, body) =>
     headers: { "Content-Type": "application/json" },
     body: body && JSON.stringify(body),
   });
+
+// shrink before upload: keeps bodies under Vercel's 4.5MB function limit and pages fast
+async function resize(file) {
+  const bmp = await createImageBitmap(file);
+  const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bmp.width * scale);
+  canvas.height = Math.round(bmp.height * scale);
+  canvas.getContext("2d").drawImage(bmp, 0, 0, canvas.width, canvas.height);
+  return new Promise((done) => canvas.toBlob(done, "image/webp", 0.85));
+}
+
+async function uploadImage(file) {
+  const name = file.name.replace(/\.[^.]+$/, "") + ".webp";
+  const res = await fetch(`/api/upload?name=${encodeURIComponent(name)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/octet-stream" },
+    body: await resize(file),
+  });
+  if (!res.ok) throw new Error(res.status === 401 ? "Session expired" : "Upload failed");
+  return (await res.json()).url;
+}
+
+function UploadButton({ onUploaded, multiple }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const pick = async (e) => {
+    const files = [...e.target.files];
+    e.target.value = "";
+    setBusy(true);
+    setError("");
+    try {
+      onUploaded(await Promise.all(files.map(uploadImage)));
+    } catch (err) {
+      setError(err.message);
+    }
+    setBusy(false);
+  };
+  return (
+    <span className="inline-flex items-center gap-3">
+      <label className={`${btn} cursor-pointer`}>
+        <Upload size={14} className="mr-1 inline" />
+        {busy ? "Uploading…" : "Upload"}
+        <input type="file" accept="image/*" multiple={multiple} hidden disabled={busy} onChange={pick} />
+      </label>
+      {error && <span role="alert" className="text-sm text-red-500">{error}</span>}
+    </span>
+  );
+}
+
+function ImageField({ label, value, onChange }) {
+  return (
+    <div className="space-y-2">
+      <span className="text-xs uppercase tracking-widest text-muted-foreground" style={mono}>{label}</span>
+      <div className="flex items-center gap-4">
+        {value ? (
+          <img src={value} alt="" className="h-24 w-20 border border-border object-cover" />
+        ) : (
+          <span className="text-sm text-muted-foreground">Using bundled image</span>
+        )}
+        <UploadButton onUploaded={([url]) => onChange(url)} />
+        {value && <button type="button" className={btn} onClick={() => onChange("")}>Use default</button>}
+      </div>
+    </div>
+  );
+}
+
+function PhotoList({ value, onChange }) {
+  return (
+    <div className="space-y-2">
+      <span className="text-xs uppercase tracking-widest text-muted-foreground" style={mono}>
+        About photos (none = bundled photos)
+      </span>
+      <div className="flex flex-wrap gap-3">
+        {value.map((url, i) => (
+          <div key={url} className="relative">
+            <img src={url} alt="" className="h-28 w-24 border border-border object-cover" />
+            <button
+              type="button"
+              aria-label="Remove photo"
+              className="absolute right-1 top-1 border border-border bg-background/90 p-1"
+              onClick={() => onChange(value.filter((_, j) => j !== i))}
+            >
+              <Trash2 size={12} />
+            </button>
+          </div>
+        ))}
+      </div>
+      <UploadButton multiple onUploaded={(urls) => onChange([...value, ...urls])} />
+    </div>
+  );
+}
+
+function Media() {
+  const [files, setFiles] = useState(null);
+  const refresh = () =>
+    fetch("/api/upload")
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setFiles);
+  useEffect(() => {
+    refresh();
+  }, []);
+
+  const remove = async (url) => {
+    if (!window.confirm("Delete this image? Any section using it will show a broken image until you change it.")) return;
+    await api(`/api/upload?url=${encodeURIComponent(url)}`, "DELETE");
+    refresh();
+  };
+
+  if (!files) return <p className="text-sm">Loading…</p>;
+  return (
+    <div className="space-y-4">
+      <UploadButton multiple onUploaded={refresh} />
+      {!files.length && <p className="text-sm text-muted-foreground">No uploaded images yet.</p>}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        {files.map((f) => (
+          <div key={f.url} className="space-y-2 border border-border p-2">
+            <img src={f.url} alt="" className="aspect-[3/4] w-full object-cover" />
+            <div className="flex items-center justify-between text-xs text-muted-foreground" style={mono}>
+              <span>{Math.round(f.size / 1024)} KB</span>
+              <button type="button" className={btn} onClick={() => remove(f.url)} aria-label="Delete image">
+                <Trash2 size={14} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function Field({ label, value, onChange, rows }) {
   const Tag = rows ? "textarea" : "input";
@@ -102,12 +232,10 @@ const editors = {
           </div>
         )}
       />
-      <Field
-        label="About photo URLs (one per line, empty = bundled photos)"
-        rows={5}
-        value={(d.photos ?? []).join("\n")}
-        onChange={(v) => set({ ...d, photos: v.split("\n").map((s) => s.trim()).filter(Boolean) })}
-      />
+      <h3 className="pt-2 text-sm">Images</h3>
+      <ImageField label="Hero portrait (light theme)" value={d.heroLight} onChange={(v) => set({ ...d, heroLight: v })} />
+      <ImageField label="Hero portrait (dark theme)" value={d.heroDark} onChange={(v) => set({ ...d, heroDark: v })} />
+      <PhotoList value={d.photos ?? []} onChange={(photos) => set({ ...d, photos })} />
     </div>
   ),
 
@@ -128,6 +256,29 @@ const editors = {
         </>
       )}
     />
+  ),
+
+  commands: (d, set) => (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Hero terminal commands. Built in and always available: help, echo, date, clear. Names may have spaces
+        (e.g. "ls skills"). Set "Scroll to" to jump to a section instead of printing output.
+      </p>
+      <List
+        items={d}
+        onChange={set}
+        blank={{ name: "", output: "" }}
+        render={(c, up) => (
+          <>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Command" value={c.name} onChange={(v) => up({ name: v.trim().toLowerCase() })} />
+              <Field label="Scroll to section id (optional)" value={c.scrollTo} onChange={(v) => up({ scrollTo: v.trim() })} />
+            </div>
+            <Field label="Output" rows={2} value={c.output} onChange={(v) => up({ output: v })} />
+          </>
+        )}
+      />
+    </div>
   ),
 
   skills: (d, set) => (
@@ -218,7 +369,7 @@ function Dashboard({ onLogout }) {
       </header>
 
       <nav className="flex gap-2">
-        {Object.keys(editors).map((k) => (
+        {[...Object.keys(editors), "media"].map((k) => (
           <button
             key={k}
             className={`${btn} ${k === tab ? "border-accent text-accent" : ""}`}
@@ -232,12 +383,17 @@ function Dashboard({ onLogout }) {
         ))}
       </nav>
 
-      {editors[tab](data[tab], (v) => setData({ ...data, [tab]: v }))}
-
-      <div className="sticky bottom-0 flex items-center gap-4 border-t border-border bg-background py-4">
-        <button className={btn} onClick={save}>Save {tab}</button>
-        <span className="text-sm text-muted-foreground" role="status">{status}</span>
-      </div>
+      {tab === "media" ? (
+        <Media />
+      ) : (
+        <>
+          {editors[tab](data[tab], (v) => setData({ ...data, [tab]: v }))}
+          <div className="sticky bottom-0 flex items-center gap-4 border-t border-border bg-background py-4">
+            <button className={btn} onClick={save}>Save {tab}</button>
+            <span className="text-sm text-muted-foreground" role="status">{status}</span>
+          </div>
+        </>
+      )}
     </div>
   );
 }

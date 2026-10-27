@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import profile from "@/data/profile";
 import projects from "@/data/projects";
 import skills from "@/data/skills";
+import commands from "@/data/commands";
 
 // bundled content doubles as fallback when the API/DB is down or a block was never saved
-export const defaults = { profile, projects, skills };
+export const defaults = { profile, projects, skills, commands };
 
 let request;
 export const fetchContent = (fresh) => {

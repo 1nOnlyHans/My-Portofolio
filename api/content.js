@@ -1,6 +1,6 @@
 import { sql, init, isAdmin } from "./_lib.js";
 
-const KEYS = ["profile", "projects", "skills"];
+const KEYS = ["profile", "projects", "skills", "commands"];
 
 export default async function handler(req, res) {
   await init();

@@ -75,14 +75,15 @@ function HeroName() {
 }
 
 function HeroPortrait() {
+  const p = useContent("profile");
   const corner = "absolute h-5 w-5 border-accent";
   return (
     <figure className="relative">
       <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
         {/* theme-reactive: only the visible one is fetched (lazy + display:none) */}
         {[
-          [heroLight, "block dark:hidden", "Hans Diaz smiling, wearing glasses"],
-          [heroDark, "hidden dark:block", ""],
+          [p.heroLight || heroLight, "block dark:hidden", `${p.firstName} ${p.lastName}`],
+          [p.heroDark || heroDark, "hidden dark:block", ""],
         ].map(([src, show, alt]) => (
           <img
             key={src}
@@ -119,19 +120,10 @@ function HeroPortrait() {
 
 const PROMPT = "hans@portfolio:~";
 
-const commands = {
-  help: () =>
-    "Commands: help, whoami, role, skills, pwd, about, projects, contact, echo <text>, date, clear",
-  whoami: () => "Hans Diaz — Full-Stack Web Developer",
-  role: () => "Full-Stack Developer",
-  skills: () => "Web Development · UI/UX Design",
-  ls: (arg) => (arg === "skills" ? "Web Development · UI/UX Design" : "skills  projects  about  contact"),
-  pwd: () => "/Cavite/Philippines",
+// computed built-ins; everything else comes from the editable `commands` content
+const builtins = {
   date: () => new Date().toString(),
   echo: (arg) => arg.replace(/^["']|["']$/g, ""),
-  about: () => go("about"),
-  projects: () => go("projects"),
-  contact: () => go("contact"),
 };
 
 function go(id) {
@@ -139,7 +131,8 @@ function go(id) {
   return `Scrolling to ${id}...`;
 }
 
-function HeroTerminal({ onClose }) {
+function HeroTerminal({ onClose, commands }) {
+  const names = [...commands.map((c) => c.name), "help", "echo", "date", "clear"];
   const [lines, setLines] = useState([
     { output: 'Welcome. Type "help" to see available commands.' },
   ]);
@@ -158,20 +151,30 @@ function HeroTerminal({ onClose }) {
     const [name, ...rest] = raw.trim().split(/\s+/);
     const arg = rest.join(" ");
     if (name === "clear") return setLines([]);
-    const fn = commands[name];
+    // full line first so multi-word commands ("ls skills") win over their first word
+    const custom =
+      commands.find((c) => c.name === raw.trim()) ?? commands.find((c) => c.name === name);
     const output = !name
       ? null
-      : fn
-        ? fn(arg)
-        : `command not found: ${name}. Type "help".`;
+      : custom
+        ? custom.scrollTo
+          ? go(custom.scrollTo)
+          : custom.output
+        : name === "help"
+          ? `Commands: ${[...commands.map((c) => c.name), "echo <text>", "date", "clear"].join(", ")}`
+          : builtins[name]
+            ? builtins[name](arg)
+            : `command not found: ${name}. Type "help".`;
     setLines((l) => [...l, { command: raw }, ...(output ? [{ output }] : [])]);
   };
 
-  const [typing, setTyping] = useState(true);
+  // skip the auto-typed intro when the admin removed `whoami`
+  const [typing, setTyping] = useState(commands.some((c) => c.name === "whoami"));
 
   useEffect(() => {
     // intro: auto-type one command, then hand over to the visitor
     const intro = "whoami";
+    if (!typing) return;
     let n = 0;
     const id = setInterval(() => {
       n++;
@@ -191,7 +194,7 @@ function HeroTerminal({ onClose }) {
   const onKeyDown = (e) => {
     if (e.key === "Tab") {
       e.preventDefault();
-      const hits = [...Object.keys(commands), "clear"].filter(
+      const hits = names.filter(
         (c) => input && c.startsWith(input),
       );
       if (hits.length === 1) setInput(hits[0]);
@@ -281,6 +284,7 @@ function HeroTerminal({ onClose }) {
   );
 }
 function TerminalModal() {
+  const commands = useContent("commands");
   const dialogRef = useRef(null);
   const [open, setOpen] = useState(false);
 
@@ -308,7 +312,7 @@ function TerminalModal() {
         className="m-auto w-[min(44rem,94vw)] bg-transparent p-0 text-foreground backdrop:bg-black/60 backdrop:backdrop-blur-sm"
       >
         {/* mount only while open so the intro replays each time */}
-        {open && <HeroTerminal onClose={close} />}
+        {open && <HeroTerminal onClose={close} commands={commands} />}
       </dialog>
     </>
   );
