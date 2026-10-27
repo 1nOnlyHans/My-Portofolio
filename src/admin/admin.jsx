@@ -32,7 +32,10 @@ async function uploadImage(file) {
     headers: { "Content-Type": "application/octet-stream" },
     body: await resize(file),
   });
-  if (!res.ok) throw new Error(res.status === 401 ? "Session expired" : "Upload failed");
+  if (!res.ok) {
+    const { error } = await res.json().catch(() => ({}));
+    throw new Error(res.status === 401 ? "Session expired" : error || `Upload failed (${res.status})`);
+  }
   return (await res.json()).url;
 }
 

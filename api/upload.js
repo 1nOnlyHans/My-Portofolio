@@ -6,6 +6,18 @@ const TYPES = ["image/webp", "image/jpeg", "image/png"];
 
 export default async function handler(req, res) {
   if (!(await isAdmin(req))) return res.status(401).json({ error: "unauthorized" });
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return res.status(500).json({ error: "BLOB_READ_WRITE_TOKEN is not set. Create a Blob store in Vercel and redeploy." });
+  }
+  try {
+    return await handle(req, res);
+  } catch (err) {
+    console.error("upload failed:", err);
+    return res.status(500).json({ error: err.message });
+  }
+}
+
+async function handle(req, res) {
 
   if (req.method === "GET") {
     const { blobs } = await list({ prefix: PREFIX });
