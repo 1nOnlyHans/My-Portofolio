@@ -12,8 +12,8 @@ export const githubRoutes = {
   commits: (owner, repo, perPage = 10) =>
     `${BASE}/repos/${owner}/${repo}/commits?per_page=${perPage}`,
   // Third-party proxy (scrapes the public profile graph; GitHub's own endpoint has no CORS).
-  contributions: (username = GITHUB_USERNAME) =>
-    `https://github-contributions-api.jogruber.de/v4/${username}?y=last`,
+  contributions: (username = GITHUB_USERNAME, year = "last") =>
+    `https://github-contributions-api.jogruber.de/v4/${username}?y=${year}`,
   events: (username = GITHUB_USERNAME, perPage = 100) =>
     `${BASE}/users/${username}/events/public?per_page=${perPage}`,
 };

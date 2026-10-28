@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import ScrollReveal from "../components/ui/scroll-reveal";
 import ContributionHeatmap from "../components/contribution-heatmap";
 import { GITHUB_USERNAME, githubFetch, githubRoutes } from "@/lib/github";
@@ -129,6 +129,17 @@ export default function Activity() {
   const [attempt, setAttempt] = useState(0);
   const [showAll, setShowAll] = useState(false);
   const [heatTotal, setHeatTotal] = useState(0);
+  const [view, setView] = useState({ year: "last", days: [] });
+  const onYear = useCallback((year, days) => {
+    setView({ year, days });
+    setShowAll(false);
+  }, []);
+  // Past years: the events API only covers ~90 days, so list that year's active days from the heatmap data.
+  const pastDays = useMemo(
+    () => (view.year === "last" ? [] : view.days.filter((c) => c.count > 0).reverse()),
+    [view],
+  );
+  const past = view.year !== "last";
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -153,7 +164,12 @@ export default function Activity() {
       <ScrollReveal className="w-full">
         <span className="section-label">03 / Activity</span>
         <h2 className="section-title">Lately, in the <em>commit log</em></h2>
-        {events && days.length > 0 && (
+        {past && (
+          <p className="mt-4 max-w-[65ch] text-sm leading-relaxed text-muted-foreground">
+            {pastDays.length} active days in {view.year}. GitHub only exposes commit-level detail for recent weeks.
+          </p>
+        )}
+        {!past && events && days.length > 0 && (
           <p className="mt-4 max-w-[65ch] text-sm leading-relaxed text-muted-foreground">
             {events.length} public events across {repoCount} {repoCount === 1 ? "repository" : "repositories"} since{" "}
             {dateFmt.format(new Date(events.at(-1).created_at))}. Straight from GitHub, nothing curated.
@@ -162,9 +178,25 @@ export default function Activity() {
       </ScrollReveal>
 
       <ScrollReveal className="mt-10 w-full" delay={0.1}>
-        <ContributionHeatmap onTotal={setHeatTotal} />
-        <div aria-busy={!events && !error} className="mt-10 border-b border-border">
-          {error ? (
+        <ContributionHeatmap onTotal={setHeatTotal} onYear={onYear} />
+        <div aria-busy={!past && !events && !error} className="mt-10 border-b border-border">
+          {past ? (
+            pastDays.length === 0 ? (
+              <p className="border-t border-border py-10 text-sm text-muted-foreground">No contributions in {view.year}.</p>
+            ) : (
+              pastDays.slice(0, showAll ? undefined : DAYS_VISIBLE).map((c) => (
+                <div key={c.date} className="grid gap-x-8 gap-y-2 border-t border-border py-6 sm:grid-cols-[9rem_1fr]">
+                  <h3 className="font-mono text-xs font-normal uppercase tracking-widest text-muted-foreground">
+                    {dateFmt.format(new Date(`${c.date}T12:00`))}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-serif text-xl tracking-tight text-foreground">{c.count}</span>{" "}
+                    contribution{c.count === 1 ? "" : "s"}
+                  </p>
+                </div>
+              ))
+            )
+          ) : error ? (
             <p className="border-t border-border py-10 text-sm text-muted-foreground">
               Couldn&apos;t reach GitHub ({error}).{" "}
               <button
@@ -196,13 +228,13 @@ export default function Activity() {
           )}
         </div>
 
-        {days.length > DAYS_VISIBLE && (
+        {(past ? pastDays : days).length > DAYS_VISIBLE && (
           <button
             type="button"
             onClick={() => setShowAll((v) => !v)}
             className="mt-6 font-mono text-xs font-normal uppercase tracking-widest text-muted-foreground underline decoration-accent decoration-2 underline-offset-[6px] transition-colors hover:text-foreground"
           >
-            {showAll ? "Show fewer days" : `Show all ${days.length} days`}
+            {showAll ? "Show fewer days" : `Show all ${(past ? pastDays : days).length} days`}
           </button>
         )}
       </ScrollReveal>
