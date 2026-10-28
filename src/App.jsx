@@ -13,7 +13,7 @@ import "./App.css";
 function App() {
   return (
     <>
-      <div className="mx-auto min-h-screen w-full max-w-5xl pt-18">
+      <div className="min-h-screen w-full overflow-x-clip pt-18 lg:pt-0 lg:pl-60">
         <Navbar />
         <main className="scroll-sections">
           <Hero id="hero" />

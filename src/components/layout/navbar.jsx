@@ -8,16 +8,39 @@ const baseMenus = [
   { name: "Projects", link: "#projects" },
   { name: "Activity", link: "#activity" },
   { name: "Skills", link: "#skills" },
+  { name: "Certifications", link: "#certifications" },
   { name: "Contact", link: "#contact" },
 ];
-const certMenu = { name: "Certs", link: "#certifications" };
+
+const mono = { fontFamily: "'DM Mono', monospace" };
+
+function ThemeSwitch({ isDark, onToggle }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={isDark}
+      aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
+      onClick={onToggle}
+      className="relative flex h-8 w-14 shrink-0 items-center rounded-full bg-secondary/70 p-1 text-muted-foreground ring-1 ring-border transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+    >
+      <Sun className="absolute left-1.5 size-3.5" aria-hidden="true" />
+      <Moon className="absolute right-1.5 size-3.5" aria-hidden="true" />
+      <span
+        className={`z-10 size-6 rounded-full bg-foreground shadow-sm transition-transform duration-200 ${
+          isDark ? "translate-x-6" : "translate-x-0"
+        }`}
+      />
+    </button>
+  );
+}
 
 export default function Navbar() {
   // the section only renders once at least one certification exists
   const hasCerts = useContent("certifications").length > 0;
   const menus = hasCerts
-    ? [...baseMenus.slice(0, 4), certMenu, ...baseMenus.slice(4)]
-    : baseMenus;
+    ? baseMenus
+    : baseMenus.filter(({ link }) => link !== "#certifications");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [isDark, setIsDark] = useState(() => {
@@ -70,89 +93,35 @@ export default function Navbar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- menus only changes with hasCerts
   }, [hasCerts]);
 
-  const linkBase =
-    "rounded-full px-3.5 py-1.5 font-mono text-sm transition-colors duration-300";
+  const toggleTheme = () => setIsDark((currentTheme) => !currentTheme);
 
   return (
-    <header className="pointer-events-none fixed inset-x-0 top-3 z-50 px-3 sm:top-4 sm:px-4">
-      <div className="pointer-events-auto mx-auto w-full max-w-3xl">
-        <nav className="flex h-13 items-center justify-between rounded-full border border-border bg-background/55 pl-5 pr-2 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl">
-          <a
-            href="#"
-            aria-label="Hans Diaz, back to top"
-            className="text-accent transition-opacity hover:opacity-70"
-          >
-            <Logo className="h-4 w-auto" />
-          </a>
-
-          <div className="flex items-center gap-2">
-            <ul className="hidden items-center gap-1 md:flex">
-              {menus.map((menu) => {
-                const active = activeSection === menu.link.slice(1);
-                return (
-                  <li key={menu.name}>
-                    <a
-                      href={menu.link}
-                      aria-current={active ? "page" : undefined}
-                      onClick={() => setActiveSection(menu.link.slice(1))}
-                      className={`${linkBase} hover:text-foreground ${
-                        active
-                          ? "bg-foreground/10 text-foreground"
-                          : "text-muted-foreground"
-                      }`}
-                      style={{ fontFamily: "'DM Mono', monospace" }}
-                    >
-                      {menu.name}
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-
-            <button
-              type="button"
-              role="switch"
-              aria-checked={isDark}
-              aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
-              onClick={() => setIsDark((currentTheme) => !currentTheme)}
-              className="relative flex h-8 w-14 items-center rounded-full bg-secondary/70 p-1 text-muted-foreground ring-1 ring-border transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-            >
-              <Sun className="absolute left-1.5 size-3.5" aria-hidden="true" />
-              <Moon className="absolute right-1.5 size-3.5" aria-hidden="true" />
-              <span
-                className={`z-10 size-6 rounded-full bg-foreground shadow-sm transition-transform duration-200 ${
-                  isDark ? "translate-x-6" : "translate-x-0"
-                }`}
-              />
-            </button>
-
-            <button
-              type="button"
-              aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
-              aria-expanded={isMenuOpen}
-              aria-controls="mobile-navigation"
-              onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
-              className="flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:hidden"
-            >
-              {isMenuOpen ? (
-                <X className="size-5" aria-hidden="true" />
-              ) : (
-                <Menu className="size-5" aria-hidden="true" />
-              )}
-            </button>
-          </div>
-        </nav>
-
-        <div
-          id="mobile-navigation"
-          inert={!isMenuOpen}
-          className={`mt-2 origin-top overflow-hidden rounded-3xl border border-border bg-background/70 backdrop-blur-xl transition-all duration-300 md:hidden ${
-            isMenuOpen
-              ? "max-h-80 scale-100 opacity-100"
-              : "max-h-0 scale-95 border-transparent opacity-0"
-          }`}
+    <>
+      {/* desktop: fixed left sidebar */}
+      <aside
+        aria-label="Primary"
+        className="fixed inset-y-0 left-0 z-50 hidden w-60 flex-col border-r border-border bg-background px-7 py-8 lg:flex"
+      >
+        <a
+          href="#"
+          aria-label="Hans Diaz, back to top"
+          onClick={() => setActiveSection("home")}
+          className="w-fit text-accent transition-opacity hover:opacity-70"
         >
-          <ul className="flex flex-col gap-1 p-2">
+          <Logo className="h-6 w-auto" />
+        </a>
+        <p className="mt-5 font-serif text-xl leading-tight tracking-tight">
+          Hans <em className="text-accent">Diaz</em>
+        </p>
+        <p
+          className="mt-1.5 text-[0.7rem] uppercase tracking-[0.2em] text-muted-foreground"
+          style={mono}
+        >
+          Full-stack developer
+        </p>
+
+        <nav aria-label="Sections" className="my-auto">
+          <ul className="flex flex-col gap-1">
             {menus.map((menu) => {
               const active = activeSection === menu.link.slice(1);
               return (
@@ -160,25 +129,97 @@ export default function Navbar() {
                   <a
                     href={menu.link}
                     aria-current={active ? "page" : undefined}
-                    onClick={() => {
-                      setActiveSection(menu.link.slice(1));
-                      setIsMenuOpen(false);
-                    }}
-                    className={`block ${linkBase} py-2.5 hover:text-foreground ${
-                      active
-                        ? "bg-foreground/10 text-foreground"
-                        : "text-muted-foreground"
+                    onClick={() => setActiveSection(menu.link.slice(1))}
+                    className={`group flex items-center gap-3 py-2 text-sm transition-colors duration-300 hover:text-foreground ${
+                      active ? "text-foreground" : "text-muted-foreground"
                     }`}
-                    style={{ fontFamily: "'DM Mono', monospace" }}
+                    style={mono}
                   >
+                    <span
+                      aria-hidden="true"
+                      className={`h-px bg-accent transition-all duration-300 ${
+                        active ? "w-6" : "w-2 opacity-0 group-hover:opacity-100"
+                      }`}
+                    />
                     {menu.name}
                   </a>
                 </li>
               );
             })}
           </ul>
+        </nav>
+
+        <ThemeSwitch isDark={isDark} onToggle={toggleTheme} />
+      </aside>
+
+      {/* mobile and tablet: floating pill with dropdown */}
+      <header className="pointer-events-none fixed inset-x-0 top-3 z-50 px-3 sm:top-4 sm:px-4 lg:hidden">
+        <div className="pointer-events-auto mx-auto w-full max-w-3xl">
+          <nav className="flex h-13 items-center justify-between rounded-full border border-border bg-background/55 pl-5 pr-2 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+            <a
+              href="#"
+              aria-label="Hans Diaz, back to top"
+              className="text-accent transition-opacity hover:opacity-70"
+            >
+              <Logo className="h-4 w-auto" />
+            </a>
+
+            <div className="flex items-center gap-2">
+              <ThemeSwitch isDark={isDark} onToggle={toggleTheme} />
+              <button
+                type="button"
+                aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+                aria-expanded={isMenuOpen}
+                aria-controls="mobile-navigation"
+                onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
+                className="flex size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              >
+                {isMenuOpen ? (
+                  <X className="size-5" aria-hidden="true" />
+                ) : (
+                  <Menu className="size-5" aria-hidden="true" />
+                )}
+              </button>
+            </div>
+          </nav>
+
+          <div
+            id="mobile-navigation"
+            inert={!isMenuOpen}
+            className={`mt-2 origin-top overflow-hidden rounded-3xl border border-border bg-background/70 backdrop-blur-xl transition-all duration-300 ${
+              isMenuOpen
+                ? "max-h-96 scale-100 opacity-100"
+                : "max-h-0 scale-95 border-transparent opacity-0"
+            }`}
+          >
+            <ul className="flex flex-col gap-1 p-2">
+              {menus.map((menu) => {
+                const active = activeSection === menu.link.slice(1);
+                return (
+                  <li key={menu.name}>
+                    <a
+                      href={menu.link}
+                      aria-current={active ? "page" : undefined}
+                      onClick={() => {
+                        setActiveSection(menu.link.slice(1));
+                        setIsMenuOpen(false);
+                      }}
+                      className={`block rounded-full px-3.5 py-2.5 text-sm transition-colors duration-300 hover:text-foreground ${
+                        active
+                          ? "bg-foreground/10 text-foreground"
+                          : "text-muted-foreground"
+                      }`}
+                      style={mono}
+                    >
+                      {menu.name}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

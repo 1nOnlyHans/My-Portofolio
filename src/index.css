@@ -198,6 +198,14 @@
     scroll-margin-top: 4.5rem;
   }
 
+  /* sidebar layout: no top bar to clear */
+  @media (min-width: 64rem) {
+    .portfolio-section {
+      min-height: 100svh;
+      scroll-margin-top: 0;
+    }
+  }
+
   .portfolio-section::after {
     position: absolute;
     bottom: 0;
