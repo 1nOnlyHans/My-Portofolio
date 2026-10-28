@@ -1,16 +1,23 @@
 import { useEffect, useState } from "react";
 import { Menu, Moon, Sun, X } from "lucide-react";
 import Logo from "../logo";
+import { useContent } from "../../lib/content";
 
-const menus = [
+const baseMenus = [
   { name: "About", link: "#about" },
   { name: "Projects", link: "#projects" },
   { name: "Activity", link: "#activity" },
   { name: "Skills", link: "#skills" },
   { name: "Contact", link: "#contact" },
 ];
+const certMenu = { name: "Certs", link: "#certifications" };
 
 export default function Navbar() {
+  // the section only renders once at least one certification exists
+  const hasCerts = useContent("certifications").length > 0;
+  const menus = hasCerts
+    ? [...baseMenus.slice(0, 4), certMenu, ...baseMenus.slice(4)]
+    : baseMenus;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [isDark, setIsDark] = useState(() => {
@@ -60,7 +67,8 @@ export default function Navbar() {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
     };
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- menus only changes with hasCerts
+  }, [hasCerts]);
 
   const linkBase =
     "rounded-full px-3.5 py-1.5 font-mono text-sm transition-colors duration-300";

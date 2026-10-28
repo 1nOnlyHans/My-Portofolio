@@ -155,7 +155,7 @@ function MediaPicker({ onPick, multiple }) {
   );
 }
 
-function ImageField({ label, value, onChange }) {
+function ImageField({ label, value, onChange, empty = "Using bundled image" }) {
   return (
     <div className="space-y-2">
       <span className="text-xs uppercase tracking-widest text-muted-foreground" style={mono}>{label}</span>
@@ -163,11 +163,11 @@ function ImageField({ label, value, onChange }) {
         {value ? (
           <img src={value} alt="" className="h-24 w-20 border border-border object-cover" />
         ) : (
-          <span className="text-sm text-muted-foreground">Using bundled image</span>
+          <span className="text-sm text-muted-foreground">{empty}</span>
         )}
         <UploadButton onUploaded={([url]) => onChange(url)} />
         <MediaPicker onPick={([url]) => onChange(url)} />
-        {value && <button type="button" className={btn} onClick={() => onChange("")}>Use default</button>}
+        {value && <button type="button" className={btn} onClick={() => onChange("")}>{empty === "Using bundled image" ? "Use default" : "Remove"}</button>}
       </div>
     </div>
   );
@@ -404,6 +404,33 @@ const editors = {
         </>
       )}
     />
+  ),
+
+  certifications: (d, set) => (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Shown in the home section (first 4) and on /certifications. The section stays hidden until you add one.
+      </p>
+      <List
+        items={d}
+        onChange={set}
+        blank={{ title: "", issuer: "", date: "", credentialId: "", url: "", image: "" }}
+        render={(c, up) => (
+          <>
+            <Field label="Title" value={c.title} onChange={(v) => up({ title: v })} />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Issuer" value={c.issuer} onChange={(v) => up({ issuer: v })} />
+              <Field label="Date (e.g. Jun 2025)" value={c.date} onChange={(v) => up({ date: v })} />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Credential ID (optional)" value={c.credentialId} onChange={(v) => up({ credentialId: v })} />
+              <Field label="Verify link (optional)" value={c.url} onChange={(v) => up({ url: v })} />
+            </div>
+            <ImageField label="Certificate image (optional)" value={c.image} onChange={(v) => up({ image: v })} empty="No image" />
+          </>
+        )}
+      />
+    </div>
   ),
 
   commands: (d, set) => (

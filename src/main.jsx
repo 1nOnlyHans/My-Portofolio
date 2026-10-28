@@ -10,7 +10,9 @@ const Admin = lazy(() => import('./admin/admin.jsx'))
 const ProjectPage = lazy(() => import('./sections/project-page.jsx'))
 // eslint-disable-next-line react-refresh/only-export-components
 const AllProjects = lazy(() => import('./sections/all-projects.jsx'))
-const path =window.location.pathname.replace(/\/$/, '')
+// eslint-disable-next-line react-refresh/only-export-components
+const AllCertifications = lazy(() => import('./sections/all-certifications.jsx'))
+const path = window.location.pathname.replace(/\/$/, '')
 const slug = /^\/projects\/([^/]+)$/.exec(path)?.[1]
 
 createRoot(document.getElementById('root')).render(
@@ -22,6 +24,10 @@ createRoot(document.getElementById('root')).render(
     ) : path === '/projects' ? (
       <Suspense fallback={null}>
         <AllProjects />
+      </Suspense>
+    ) : path === '/certifications' ? (
+      <Suspense fallback={null}>
+        <AllCertifications />
       </Suspense>
     ) : slug ? (
       <Suspense fallback={null}>
