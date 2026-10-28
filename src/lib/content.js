@@ -7,6 +7,14 @@ import commands from "@/data/commands";
 // bundled content doubles as fallback when the API/DB is down or a block was never saved
 export const defaults = { profile, projects, skills, commands };
 
+export const isVideo = (url) => /\.(mp4|webm|mov)$/i.test(url.split("?")[0]);
+
+// project media is stored as {url, caption}; older saves are bare url strings
+export const mediaItem = (m) => (typeof m === "string" ? { url: m, caption: "" } : m);
+
+export const slugify = (title) =>
+  title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
 let request;
 export const fetchContent = (fresh) => {
   const load = () =>

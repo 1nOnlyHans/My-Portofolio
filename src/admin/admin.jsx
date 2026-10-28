@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowDown, ArrowUp, Image as ImageIcon, Plus, Trash2, Upload, X } from "lucide-react";
-import { defaults, fetchContent } from "@/lib/content";
+import { upload } from "@vercel/blob/client";
+import { defaults, fetchContent, isVideo, mediaItem } from "@/lib/content";
 
 const box = "w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:border-accent";
 const btn =
@@ -39,7 +40,27 @@ async function uploadImage(file) {
   return (await res.json()).url;
 }
 
-function UploadButton({ onUploaded, multiple }) {
+// videos skip the function (4.5MB body cap) and go browser -> Blob with a token from /api/upload
+async function uploadVideo(file) {
+  const blob = await upload(`portfolio/${file.name.replace(/[^\w.-]/g, "_")}`, file, {
+    access: "public",
+    handleUploadUrl: "/api/upload",
+    contentType: file.type,
+  });
+  return blob.url;
+}
+
+const uploadFile = (file) => (file.type.startsWith("video/") ? uploadVideo(file) : uploadImage(file));
+
+// image or video thumbnail
+const Thumb = ({ url, className }) =>
+  isVideo(url) ? (
+    <video src={url} muted preload="metadata" className={className} />
+  ) : (
+    <img src={url} alt="" className={className} />
+  );
+
+function UploadButton({ onUploaded, multiple, video }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const pick = async (e) => {
@@ -48,7 +69,7 @@ function UploadButton({ onUploaded, multiple }) {
     setBusy(true);
     setError("");
     try {
-      onUploaded(await Promise.all(files.map(uploadImage)));
+      onUploaded(await Promise.all(files.map(uploadFile)));
     } catch (err) {
       setError(err.message);
     }
@@ -59,7 +80,7 @@ function UploadButton({ onUploaded, multiple }) {
       <label className={`${btn} cursor-pointer`}>
         <Upload size={14} className="mr-1 inline" />
         {busy ? "Uploading…" : "Upload"}
-        <input type="file" accept="image/*" multiple={multiple} hidden disabled={busy} onChange={pick} />
+        <input type="file" accept={video ? "image/*,video/mp4,video/webm,video/quicktime" : "image/*"} multiple={multiple} hidden disabled={busy} onChange={pick} />
       </label>
       {error && <span role="alert" className="text-sm text-red-500">{error}</span>}
     </span>
@@ -118,7 +139,7 @@ function MediaPicker({ onPick, multiple }) {
               aria-pressed={chosen.includes(f.url)}
               className={`border p-1 ${chosen.includes(f.url) ? "border-accent ring-2 ring-accent" : "border-border hover:border-accent"}`}
             >
-              <img src={f.url} alt="" className="aspect-[3/4] w-full object-cover" />
+              <Thumb url={f.url} className="aspect-[3/4] w-full object-cover" />
             </button>
           ))}
         </div>
@@ -152,16 +173,16 @@ function ImageField({ label, value, onChange }) {
   );
 }
 
-function PhotoList({ value, onChange }) {
+function PhotoList({ value, onChange, label = "About photos (none = bundled photos)", video }) {
   return (
     <div className="space-y-2">
       <span className="text-xs uppercase tracking-widest text-muted-foreground" style={mono}>
-        About photos (none = bundled photos)
+        {label}
       </span>
       <div className="flex flex-wrap gap-3">
         {value.map((url, i) => (
           <div key={url} className="relative">
-            <img src={url} alt="" className="h-28 w-24 border border-border object-cover" />
+            <Thumb url={url} className="h-28 w-24 border border-border object-cover" />
             <button
               type="button"
               aria-label="Remove photo"
@@ -174,11 +195,58 @@ function PhotoList({ value, onChange }) {
         ))}
       </div>
       <div className="flex flex-wrap items-center gap-3">
-        <UploadButton multiple onUploaded={(urls) => onChange([...value, ...urls])} />
+        <UploadButton multiple video={video} onUploaded={(urls) => onChange([...value, ...urls])} />
         <MediaPicker
           multiple
           onPick={(urls) => onChange([...value, ...urls.filter((u) => !value.includes(u))])}
         />
+      </div>
+    </div>
+  );
+}
+
+// project media: ordered {url, caption} items; first image becomes the card cover
+function MediaList({ value, onChange }) {
+  const add = (urls) =>
+    onChange([...value, ...urls.filter((u) => !value.some((m) => m.url === u)).map((url) => ({ url, caption: "" }))]);
+  const move = (i, d) => {
+    const next = [...value];
+    [next[i], next[i + d]] = [next[i + d], next[i]];
+    onChange(next);
+  };
+  const set = (i, patch) => onChange(value.map((m, j) => (j === i ? { ...m, ...patch } : m)));
+  return (
+    <div className="space-y-3">
+      <span className="text-xs uppercase tracking-widest text-muted-foreground" style={mono}>
+        Project media: shown in this order, first image is the cover
+      </span>
+      {value.map((m, i) => (
+        <div key={m.url} className="flex gap-3 border border-border p-2">
+          <Thumb url={m.url} className="h-20 w-28 shrink-0 border border-border object-cover" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <input
+              className={box}
+              placeholder="Caption (optional)"
+              value={m.caption ?? ""}
+              onChange={(e) => set(i, { caption: e.target.value })}
+            />
+            <div className="flex gap-2">
+              <button type="button" className={btn} disabled={i === 0} onClick={() => move(i, -1)} aria-label="Move media up">
+                <ArrowUp size={14} />
+              </button>
+              <button type="button" className={btn} disabled={i === value.length - 1} onClick={() => move(i, 1)} aria-label="Move media down">
+                <ArrowDown size={14} />
+              </button>
+              <button type="button" className={btn} onClick={() => onChange(value.filter((_, j) => j !== i))} aria-label="Remove media">
+                <Trash2 size={14} />
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+      <div className="flex flex-wrap items-center gap-3">
+        <UploadButton multiple video onUploaded={add} />
+        <MediaPicker multiple onPick={add} />
       </div>
     </div>
   );
@@ -203,12 +271,12 @@ function Media() {
   if (!files) return <p className="text-sm">Loading…</p>;
   return (
     <div className="space-y-4">
-      <UploadButton multiple onUploaded={refresh} />
-      {!files.length && <p className="text-sm text-muted-foreground">No uploaded images yet.</p>}
+      <UploadButton multiple video onUploaded={refresh} />
+      {!files.length && <p className="text-sm text-muted-foreground">No uploaded media yet.</p>}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         {files.map((f) => (
           <div key={f.url} className="space-y-2 border border-border p-2">
-            <img src={f.url} alt="" className="aspect-[3/4] w-full object-cover" />
+            <Thumb url={f.url} className="aspect-[3/4] w-full object-cover" />
             <div className="flex items-center justify-between text-xs text-muted-foreground" style={mono}>
               <span>{Math.round(f.size / 1024)} KB</span>
               <button type="button" className={btn} onClick={() => remove(f.url)} aria-label="Delete image">
@@ -321,7 +389,7 @@ const editors = {
     <List
       items={d}
       onChange={set}
-      blank={{ title: "", year: new Date().getFullYear(), description: "", technologies: [], link: "#" }}
+      blank={{ title: "", year: new Date().getFullYear(), description: "", technologies: [], link: "#", details: "", media: [] }}
       render={(p, up) => (
         <>
           <div className="grid gap-3 sm:grid-cols-[1fr_8rem]">
@@ -331,6 +399,8 @@ const editors = {
           <Field label="Description" rows={3} value={p.description} onChange={(v) => up({ description: v })} />
           <ListField label="Technologies (comma separated)" value={p.technologies} onChange={(v) => up({ technologies: v })} />
           <Field label="Link" value={p.link} onChange={(v) => up({ link: v })} />
+          <Field label="Project page details (optional)" rows={5} value={p.details} onChange={(v) => up({ details: v })} />
+          <MediaList value={(p.media ?? []).map(mediaItem)} onChange={(media) => up({ media })} />
         </>
       )}
     />

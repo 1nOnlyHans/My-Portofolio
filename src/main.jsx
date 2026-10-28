@@ -6,13 +6,26 @@ import App from './App.jsx'
 // admin is a separate chunk so visitors never download it
 // eslint-disable-next-line react-refresh/only-export-components
 const Admin = lazy(() => import('./admin/admin.jsx'))
-const isAdmin = window.location.pathname.replace(/\/$/, '') === '/admin'
+// eslint-disable-next-line react-refresh/only-export-components
+const ProjectPage = lazy(() => import('./sections/project-page.jsx'))
+// eslint-disable-next-line react-refresh/only-export-components
+const AllProjects = lazy(() => import('./sections/all-projects.jsx'))
+const path =window.location.pathname.replace(/\/$/, '')
+const slug = /^\/projects\/([^/]+)$/.exec(path)?.[1]
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {isAdmin ? (
+    {path === '/admin' ? (
       <Suspense fallback={null}>
         <Admin />
+      </Suspense>
+    ) : path === '/projects' ? (
+      <Suspense fallback={null}>
+        <AllProjects />
+      </Suspense>
+    ) : slug ? (
+      <Suspense fallback={null}>
+        <ProjectPage slug={decodeURIComponent(slug)} />
       </Suspense>
     ) : (
       <App />

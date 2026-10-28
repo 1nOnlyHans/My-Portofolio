@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Menu, Moon, Sun, X } from "lucide-react";
+import Logo from "../logo";
 
 const menus = [
   { name: "About", link: "#about" },
@@ -70,10 +71,10 @@ export default function Navbar() {
         <nav className="flex h-13 items-center justify-between rounded-full border border-border bg-background/55 pl-5 pr-2 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.5)] backdrop-blur-xl">
           <a
             href="#"
-            className="font-mono text-sm tracking-widest text-muted-foreground transition-colors hover:text-accent"
-            style={{ fontFamily: "'DM Mono', monospace" }}
+            aria-label="Hans Diaz, back to top"
+            className="text-accent transition-opacity hover:opacity-70"
           >
-            {"<hansDev />"}
+            <Logo className="h-4 w-auto" />
           </a>
 
           <div className="flex items-center gap-2">

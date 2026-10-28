@@ -1,7 +1,9 @@
 import { put, del, list } from "@vercel/blob";
+import { handleUpload } from "@vercel/blob/client";
 import { isAdmin } from "./_lib.js";
 
 const PREFIX = "portfolio/";
+const VIDEO_TYPES = ["video/mp4", "video/webm", "video/quicktime"];
 const TYPES = ["image/webp", "image/jpeg", "image/png"];
 
 export default async function handler(req, res) {
@@ -22,6 +24,24 @@ async function handle(req, res) {
   if (req.method === "GET") {
     const { blobs } = await list({ prefix: PREFIX });
     return res.json(blobs.map(({ url, pathname, size, uploadedAt }) => ({ url, pathname, size, uploadedAt })));
+  }
+
+  // videos exceed Vercel's 4.5MB body limit, so the browser uploads them straight to Blob;
+  // this just issues the scoped token (caller is already admin-checked above)
+  if (req.method === "POST" && req.headers["content-type"]?.includes("application/json")) {
+    const json = await handleUpload({
+      body: req.body,
+      request: req,
+      onBeforeGenerateToken: async (pathname) => {
+        if (!pathname.startsWith(PREFIX)) throw new Error("bad path");
+        return {
+          allowedContentTypes: VIDEO_TYPES,
+          maximumSizeInBytes: 200 * 1024 * 1024,
+          addRandomSuffix: true,
+        };
+      },
+    });
+    return res.json(json);
   }
 
   if (req.method === "POST") {
