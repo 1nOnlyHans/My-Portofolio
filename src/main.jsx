@@ -12,6 +12,8 @@ const ProjectPage = lazy(() => import('./sections/project-page.jsx'))
 const AllProjects = lazy(() => import('./sections/all-projects.jsx'))
 // eslint-disable-next-line react-refresh/only-export-components
 const AllCertifications = lazy(() => import('./sections/all-certifications.jsx'))
+// eslint-disable-next-line react-refresh/only-export-components
+const AllCreative = lazy(() => import('./sections/all-creative.jsx'))
 const path = window.location.pathname.replace(/\/$/, '')
 const slug = /^\/projects\/([^/]+)$/.exec(path)?.[1]
 
@@ -28,6 +30,10 @@ createRoot(document.getElementById('root')).render(
     ) : path === '/certifications' ? (
       <Suspense fallback={null}>
         <AllCertifications />
+      </Suspense>
+    ) : path === '/creative' ? (
+      <Suspense fallback={null}>
+        <AllCreative />
       </Suspense>
     ) : slug ? (
       <Suspense fallback={null}>

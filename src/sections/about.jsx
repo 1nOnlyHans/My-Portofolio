@@ -10,6 +10,8 @@ import { useContent } from "../lib/content";
 
 const bundledPhotos = [photo1, photo2, photo3, photo4, photo5];
 const mono = { fontFamily: "'DM Mono', monospace" };
+// photo card deck hidden for now; flip to true to bring it back
+const SHOW_PHOTOS = false;
 
 function CardDeck({ photos, onOpen }) {
   const mid = (photos.length - 1) / 2;
@@ -261,11 +263,13 @@ export default function About() {
           </dl>
         </ScrollReveal>
 
-        <ScrollReveal delay={0.1}>
-          <CardDeck photos={photos} onOpen={setOpen} />
-        </ScrollReveal>
+        {SHOW_PHOTOS && (
+          <ScrollReveal delay={0.1}>
+            <CardDeck photos={photos} onOpen={setOpen} />
+          </ScrollReveal>
+        )}
       </div>
-      <PhotoModal photos={photos} index={open} onChange={setOpen} />
+      {SHOW_PHOTOS && <PhotoModal photos={photos} index={open} onChange={setOpen} />}
     </section>
   );
 }

@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { AnimatePresence, MotionConfig, motion } from "framer-motion";
-import { Play } from "lucide-react";
+import { ArrowRight, Play } from "lucide-react";
 import { useContent } from "../lib/content";
 import ScrollReveal from "../components/ui/scroll-reveal";
 import CreativeModal from "../components/creative-modal";
@@ -99,10 +99,10 @@ function Card({ project, onOpen }) {
   );
 }
 
-export default function Creative() {
+// full = standalone /creative page: every work, no teaser limit
+export default function Creative({ full = false }) {
   const all = useContent("creative");
   const [active, setActive] = useState(ALL);
-  const [shown, setShown] = useState(PAGE);
   const [open, setOpen] = useState(null);
 
   const projects = useMemo(() => publishedWorks(all), [all]);
@@ -118,23 +118,21 @@ export default function Creative() {
   if (!projects.length) return null;
 
   const visible = projects.filter((p) => active === ALL || p.category === active);
-  const select = (name) => {
-    setActive(name);
-    setShown(PAGE);
-  };
+  const shown = full ? visible.length : PAGE;
+  const Heading = full ? "h1" : "h2";
 
   return (
     <MotionConfig reducedMotion="user">
       <section
         id="creative"
         aria-labelledby="creative-title"
-        className="portfolio-section flex-col items-stretch justify-center"
+        className={full ? "flex flex-col" : "portfolio-section flex-col items-stretch justify-center"}
       >
         <ScrollReveal className="w-full">
-          <span className="section-label">03 / Creative</span>
-          <h2 id="creative-title" className="section-title">
+          {!full && <span className="section-label">03 / Creative</span>}
+          <Heading id="creative-title" className="section-title">
             Beyond the <em>Code</em>
-          </h2>
+          </Heading>
           <p className="mt-4 max-w-2xl text-muted-foreground" style={{ fontWeight: 300, lineHeight: 1.75 }}>
             Exploring creativity beyond development — from visual design and motion graphics to AI-powered content
             and digital experiences.
@@ -147,7 +145,7 @@ export default function Creative() {
               key={name}
               type="button"
               aria-pressed={active === name}
-              onClick={() => select(name)}
+              onClick={() => setActive(name)}
               className={`border px-3 py-1.5 text-xs uppercase tracking-widest transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
                 active === name
                   ? "border-accent bg-accent text-accent-foreground"
@@ -184,15 +182,18 @@ export default function Creative() {
           </ul>
         )}
 
-        {visible.length > shown && (
-          <button
-            type="button"
-            onClick={() => setShown((n) => n + PAGE)}
-            className="mt-10 w-fit border border-border px-5 py-2.5 text-xs uppercase tracking-widest text-foreground transition-colors hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        {!full && projects.length > PAGE && (
+          <a
+            href="/creative"
+            className="group mt-10 inline-flex w-fit items-center gap-3 text-xs uppercase tracking-widest text-foreground transition-colors hover:text-accent"
             style={mono}
           >
-            Load more ({visible.length - shown})
-          </button>
+            See all works ({String(projects.length).padStart(2, "0")})
+            <ArrowRight
+              size={14}
+              className="transition-transform duration-300 group-hover:translate-x-1 motion-reduce:transition-none"
+            />
+          </a>
         )}
 
         {open && <CreativeModal project={open} onClose={() => setOpen(null)} />}

@@ -2,6 +2,7 @@
   "rewrites": [{ "source": "/admin", "destination": "/index.html" },
     { "source": "/projects", "destination": "/index.html" },
     { "source": "/certifications", "destination": "/index.html" },
+    { "source": "/creative", "destination": "/index.html" },
     { "source": "/projects/:slug", "destination": "/index.html" }
   ]
 }
