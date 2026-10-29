@@ -438,7 +438,7 @@ const editors = {
   creative: (d, set) => (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">
-        "Beyond the Code" gallery. Only published works with a cover and media appear. Filter tabs are built from
+        "Beyond the Code" gallery. Only published works with media appear (a link alone is enough). Filter tabs are built from
         the categories below; the newest work is listed first.
       </p>
       <datalist id="creative-categories">
@@ -490,7 +490,7 @@ const editors = {
             </div>
             <ListField label="Tools (comma separated)" value={p.tools ?? []} onChange={(v) => up({ tools: v })} />
             <ImageField
-              label="Cover image (defaults to the first image below)"
+              label="Cover image (defaults to first image, or the YouTube thumbnail)"
               value={p.coverImage}
               onChange={(v) => up({ coverImage: v })}
               empty="Using first image"

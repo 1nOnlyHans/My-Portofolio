@@ -34,12 +34,25 @@ function Card({ project, onOpen }) {
         project.featured ? "min-h-72 sm:row-span-2" : "aspect-[4/3]"
       }`}
     >
-      <img
-        src={project.coverImage}
-        alt=""
-        loading="lazy"
-        className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:transition-none"
-      />
+      {project.coverImage ? (
+        <img
+          src={project.coverImage}
+          alt=""
+          loading="lazy"
+          className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:transition-none"
+        />
+      ) : preview ? (
+        // no cover: first frame of the hosted video
+        <video
+          src={`${preview.url}#t=0.1`}
+          muted
+          playsInline
+          preload="metadata"
+          className="absolute inset-0 size-full object-cover"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-secondary to-muted" />
+      )}
       {preview && hovering && (
         <video
           ref={videoRef}

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ArrowUpRight, ChevronLeft, ChevronRight, Maximize2, Play, X } from "lucide-react";
 import { Dialog } from "radix-ui";
-import { embedUrl, formatDate } from "../lib/creative";
+import { embedUrl, formatDate, thumbOf } from "../lib/creative";
 
 const mono = { fontFamily: "'DM Mono', monospace" };
 const serif = { fontFamily: "'Playfair Display', serif", fontWeight: 400, letterSpacing: "-0.02em" };
@@ -164,8 +164,8 @@ export default function CreativeModal({ project, onClose }) {
                       i === index ? "border-accent" : "border-border opacity-70 hover:opacity-100"
                     }`}
                   >
-                    {(m.type === "image" || m.thumbnail) && (
-                      <img src={m.thumbnail ?? m.url} alt="" loading="lazy" className="size-full object-cover" />
+                    {thumbOf(m) && (
+                      <img src={thumbOf(m)} alt="" loading="lazy" className="size-full object-cover" />
                     )}
                     {m.type === "video" && (
                       <Play size={16} aria-hidden="true" className="absolute inset-0 m-auto text-white drop-shadow" />
