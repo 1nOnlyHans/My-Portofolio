@@ -14,7 +14,7 @@ export default function Certifications() {
     <section id="certifications" className="portfolio-section flex-col items-stretch justify-center">
       <ScrollReveal className="flex w-full items-end justify-between gap-6">
         <div>
-          <span className="section-label">05 / Credentials</span>
+          <span className="section-label">06 / Credentials</span>
           <h2 className="section-title">
             Licenses &amp; <em>Certifications</em>
           </h2>

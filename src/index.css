@@ -131,6 +131,13 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    /* slim themed scrollbars instead of the browser's white default */
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted-foreground) transparent;
+  }
+
+  .dark {
+    color-scheme: dark;
   }
 
   body {

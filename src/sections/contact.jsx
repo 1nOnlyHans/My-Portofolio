@@ -294,7 +294,7 @@ export default function Contact() {
       className="portfolio-section grid grid-cols-1 items-start gap-10 md:grid-cols-2"
     >
       <ScrollReveal className="w-full" direction="right">
-        <span className="section-label">06 / Contact</span>
+        <span className="section-label">07 / Contact</span>
         <h2 className="section-title">Have a project <em>in mind?</em></h2>
         <p
           className="mt-6 text-muted-foreground mb-10"

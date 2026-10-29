@@ -33,7 +33,7 @@ export default function Skills() {
   return (
     <section id="skills" className="portfolio-section flex-col items-stretch justify-center">
       <ScrollReveal className="w-full">
-        <span className="section-label">04 / Skills</span>
+        <span className="section-label">05 / Skills</span>
         <h2 className="section-title">
           My Technical <em>Expertise</em>
         </h2>

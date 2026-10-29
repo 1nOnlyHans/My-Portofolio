@@ -8,6 +8,8 @@ const btn =
   "border border-border px-3 py-1.5 text-xs uppercase tracking-widest transition-colors hover:border-accent hover:text-accent disabled:opacity-50";
 const mono = { fontFamily: "'DM Mono', monospace" };
 
+const CREATIVE_CATEGORIES = ["Graphic Design", "AI Videos", "Video Editing", "Branding & Identity", "Others"];
+
 const api = (url, method, body) =>
   fetch(url, {
     method,
@@ -427,6 +429,88 @@ const editors = {
               <Field label="Verify link (optional)" value={c.url} onChange={(v) => up({ url: v })} />
             </div>
             <ImageField label="Certificate image (optional)" value={c.image} onChange={(v) => up({ image: v })} empty="No image" />
+          </>
+        )}
+      />
+    </div>
+  ),
+
+  creative: (d, set) => (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        "Beyond the Code" gallery. Only published works with a cover and media appear. Filter tabs are built from
+        the categories below; the newest work is listed first.
+      </p>
+      <datalist id="creative-categories">
+        {[...new Set([...CREATIVE_CATEGORIES, ...d.map((p) => p.category).filter(Boolean)])].map((c) => (
+          <option key={c} value={c} />
+        ))}
+      </datalist>
+      <List
+        items={d}
+        onChange={set}
+        blank={{
+          title: "",
+          description: "",
+          category: "",
+          coverImage: "",
+          media: [],
+          videoLinks: [],
+          tools: [],
+          createdAt: new Date().toISOString().slice(0, 10),
+          featured: false,
+          externalUrl: "",
+          published: false,
+        }}
+        render={(p, up) => (
+          <>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Title" value={p.title} onChange={(v) => up({ title: v })} />
+              <label className="block space-y-1">
+                <span className="text-xs uppercase tracking-widest text-muted-foreground" style={mono}>
+                  Category
+                </span>
+                <input
+                  className={box}
+                  list="creative-categories"
+                  value={p.category ?? ""}
+                  onChange={(e) => up({ category: e.target.value })}
+                />
+              </label>
+            </div>
+            <Field label="Description" rows={3} value={p.description} onChange={(v) => up({ description: v })} />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="block space-y-1">
+                <span className="text-xs uppercase tracking-widest text-muted-foreground" style={mono}>
+                  Created
+                </span>
+                <input type="date" className={box} value={p.createdAt ?? ""} onChange={(e) => up({ createdAt: e.target.value })} />
+              </label>
+              <Field label="External link (optional)" value={p.externalUrl} onChange={(v) => up({ externalUrl: v })} />
+            </div>
+            <ListField label="Tools (comma separated)" value={p.tools ?? []} onChange={(v) => up({ tools: v })} />
+            <ImageField
+              label="Cover image (defaults to the first image below)"
+              value={p.coverImage}
+              onChange={(v) => up({ coverImage: v })}
+              empty="Using first image"
+            />
+            <MediaList value={(p.media ?? []).map(mediaItem)} onChange={(media) => up({ media })} />
+            <ListField
+              label="YouTube / Vimeo links (comma separated)"
+              value={p.videoLinks ?? []}
+              onChange={(v) => up({ videoLinks: v })}
+            />
+            <div className="flex gap-6 text-sm">
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={!!p.published} onChange={(e) => up({ published: e.target.checked })} />
+                Published
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={!!p.featured} onChange={(e) => up({ featured: e.target.checked })} />
+                Featured (larger card)
+              </label>
+            </div>
           </>
         )}
       />

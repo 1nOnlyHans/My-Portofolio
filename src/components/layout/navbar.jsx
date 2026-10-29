@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { Menu, Moon, Sun, X } from "lucide-react";
 import Logo from "../logo";
 import { useContent } from "../../lib/content";
+import { publishedWorks } from "../../lib/creative";
 
 const baseMenus = [
   { name: "About", link: "#about" },
   { name: "Projects", link: "#projects" },
+  { name: "Beyond the Code", link: "#creative" },
   { name: "Activity", link: "#activity" },
   { name: "Skills", link: "#skills" },
   { name: "Certifications", link: "#certifications" },
@@ -38,9 +40,11 @@ function ThemeSwitch({ isDark, onToggle }) {
 export default function Navbar() {
   // the section only renders once at least one certification exists
   const hasCerts = useContent("certifications").length > 0;
-  const menus = hasCerts
-    ? baseMenus
-    : baseMenus.filter(({ link }) => link !== "#certifications");
+  const hasCreative = publishedWorks(useContent("creative")).length > 0;
+  const menus = baseMenus.filter(
+    ({ link }) =>
+      (hasCerts || link !== "#certifications") && (hasCreative || link !== "#creative"),
+  );
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [isDark, setIsDark] = useState(() => {
@@ -91,7 +95,7 @@ export default function Navbar() {
       window.removeEventListener("resize", handleScroll);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- menus only changes with hasCerts
-  }, [hasCerts]);
+  }, [hasCerts, hasCreative]);
 
   const toggleTheme = () => setIsDark((currentTheme) => !currentTheme);
 
