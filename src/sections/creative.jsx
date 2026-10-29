@@ -182,7 +182,7 @@ export default function Creative({ full = false }) {
           </ul>
         )}
 
-        {!full && projects.length > PAGE && (
+        {!full && (
           <a
             href="/creative"
             className="group mt-10 inline-flex w-fit items-center gap-3 text-xs uppercase tracking-widest text-foreground transition-colors hover:text-accent"
