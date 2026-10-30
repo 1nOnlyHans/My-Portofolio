@@ -134,11 +134,11 @@ function ProofDeck() {
                     <X size={18} aria-hidden="true" />
                   </Dialog.Close>
                 </div>
-                <div className="relative min-h-0 flex-1 overflow-auto bg-secondary">
+                <div className="relative flex min-h-0 flex-1 overflow-auto bg-secondary">
                   <img
                     src={proof[open].src}
                     alt={`16Personalities screenshot: ${proof[open].label}`}
-                    className="mx-auto w-full max-w-4xl"
+                    className="m-auto w-full min-w-[40rem] max-w-4xl sm:min-w-0"
                   />
                 </div>
                 <div className="flex justify-between border-t border-border px-3 py-2">
