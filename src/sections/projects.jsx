@@ -13,7 +13,7 @@ export default function Projects() {
     <section id="projects" className="portfolio-section flex-col items-stretch justify-center">
       <ScrollReveal className="flex w-full items-end justify-between gap-6">
         <div>
-          <span className="section-label"> 02 / Work</span>
+          <span className="section-label">Selected work</span>
           <h2 className="section-title">
             Selected <span style={{ fontStyle: "italic", color: "var(--accent)" }}>Projects</span>
           </h2>

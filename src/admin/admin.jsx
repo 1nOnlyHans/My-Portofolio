@@ -408,6 +408,33 @@ const editors = {
     />
   ),
 
+  journey: (d, set) => (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Timeline, shown in the order below (put newest first). Home shows the first 4; all on /journey. The section
+        hides while empty.
+      </p>
+      <List
+        items={d}
+        onChange={set}
+        blank={{ period: "", title: "", kind: "", place: "", description: "" }}
+        render={(j, up) => (
+          <>
+            <div className="grid gap-3 sm:grid-cols-[10rem_1fr]">
+              <Field label="Period (e.g. 2024)" value={j.period} onChange={(v) => up({ period: v })} />
+              <Field label="Title" value={j.title} onChange={(v) => up({ title: v })} />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Category (optional)" value={j.kind} onChange={(v) => up({ kind: v })} />
+              <Field label="Tech / place (optional)" value={j.place} onChange={(v) => up({ place: v })} />
+            </div>
+            <Field label="Description" rows={3} value={j.description} onChange={(v) => up({ description: v })} />
+          </>
+        )}
+      />
+    </div>
+  ),
+
   certifications: (d, set) => (
     <div className="space-y-4">
       <p className="text-sm text-muted-foreground">

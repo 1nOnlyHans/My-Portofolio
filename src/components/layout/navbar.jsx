@@ -5,12 +5,13 @@ import { useContent } from "../../lib/content";
 import { publishedWorks } from "../../lib/creative";
 
 const baseMenus = [
-  { name: "About", link: "#about" },
   { name: "Projects", link: "#projects" },
+  { name: "Skills", link: "#skills" },
+  { name: "About", link: "#about" },
+  { name: "Journey", link: "#journey" },
+  { name: "Certifications", link: "#certifications" },
   { name: "Beyond the Code", link: "#creative" },
   { name: "Activity", link: "#activity" },
-  { name: "Skills", link: "#skills" },
-  { name: "Certifications", link: "#certifications" },
   { name: "Contact", link: "#contact" },
 ];
 
@@ -41,9 +42,12 @@ export default function Navbar() {
   // the section only renders once at least one certification exists
   const hasCerts = useContent("certifications").length > 0;
   const hasCreative = publishedWorks(useContent("creative")).length > 0;
+  const hasJourney = useContent("journey").length > 0;
   const menus = baseMenus.filter(
     ({ link }) =>
-      (hasCerts || link !== "#certifications") && (hasCreative || link !== "#creative"),
+      (hasCerts || link !== "#certifications") &&
+      (hasCreative || link !== "#creative") &&
+      (hasJourney || link !== "#journey"),
   );
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
@@ -95,7 +99,7 @@ export default function Navbar() {
       window.removeEventListener("resize", handleScroll);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- menus only changes with hasCerts
-  }, [hasCerts, hasCreative]);
+  }, [hasCerts, hasCreative, hasJourney]);
 
   const toggleTheme = () => setIsDark((currentTheme) => !currentTheme);
 

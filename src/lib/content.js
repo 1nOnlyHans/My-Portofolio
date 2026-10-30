@@ -5,9 +5,10 @@ import skills from "@/data/skills";
 import commands from "@/data/commands";
 import certifications from "@/data/certifications";
 import creative from "@/data/creative";
+import journey from "@/data/journey";
 
 // bundled content doubles as fallback when the API/DB is down or a block was never saved
-export const defaults = { profile, projects, skills, commands, certifications, creative };
+export const defaults = { profile, projects, skills, commands, certifications, creative, journey };
 
 export const isVideo = (url) => /\.(mp4|webm|mov)$/i.test(url.split("?")[0]);
 

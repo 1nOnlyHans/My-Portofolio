@@ -129,7 +129,7 @@ export default function Creative({ full = false }) {
         className={full ? "flex flex-col" : "portfolio-section flex-col items-stretch justify-center"}
       >
         <ScrollReveal className="w-full">
-          {!full && <span className="section-label">03 / Creative</span>}
+          {!full && <span className="section-label">Creative</span>}
           <Heading id="creative-title" className="section-title">
             Beyond the <em>Code</em>
           </Heading>

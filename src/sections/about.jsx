@@ -216,7 +216,7 @@ export default function About() {
             style={mono}
           >
             <span className="h-px w-10 bg-accent" />
-            01 / About
+            About
           </span>
           <h2
             className="mt-8 max-w-3xl"

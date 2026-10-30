@@ -3,6 +3,7 @@
     { "source": "/projects", "destination": "/index.html" },
     { "source": "/certifications", "destination": "/index.html" },
     { "source": "/creative", "destination": "/index.html" },
+    { "source": "/journey", "destination": "/index.html" },
     { "source": "/projects/:slug", "destination": "/index.html" }
   ]
 }

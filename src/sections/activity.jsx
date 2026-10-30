@@ -162,7 +162,7 @@ export default function Activity() {
   return (
     <section id="activity" className="portfolio-section flex-col items-stretch justify-center">
       <ScrollReveal className="w-full">
-        <span className="section-label">04 / Activity</span>
+        <span className="section-label">Activity</span>
         <h2 className="section-title">Lately, in the <em>commit log</em></h2>
         {past && (
           <p className="mt-4 max-w-[65ch] text-sm leading-relaxed text-muted-foreground">

@@ -4,6 +4,7 @@ import ScrollToTop from "./components/layout/scroll-to-top";
 import Hero from "./sections/hero";
 import About from "./sections/about";
 import Contact from "./sections/contact";
+import Journey from "./sections/journey";
 import Projects from "./sections/projects";
 import Skills from "./sections/skills";
 import Creative from "./sections/creative";
@@ -18,12 +19,14 @@ function App() {
         <Navbar />
         <main className="scroll-sections">
           <Hero id="hero" />
-          <About id="about" />
+          {/* visitor order: proof (work) > capability (skills) > person (about, journey) > credentials > extras > live signal > contact */}
           <Projects id="projects" />
+          <Skills id="skills" />
+          <About id="about" />
+          <Journey />
+          <Certifications id="certifications" />
           <Creative id="creative" />
           <Activity id="activity" />
-          <Skills id="skills" />
-          <Certifications id="certifications" />
           <Contact id="contact" />
         </main>
         <Footer />
