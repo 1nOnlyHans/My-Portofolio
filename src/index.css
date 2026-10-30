@@ -271,6 +271,45 @@
   }
 }
 
+/* Theme switch: new theme wipes down over the old one, like the loading screen's exit */
+@keyframes theme-wipe {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+
+  to {
+    clip-path: inset(0);
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  animation: theme-wipe 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* the switch sits outside the wipe: its live new state shows at once so the knob slides on screen */
+::view-transition-group(theme-switch) {
+  animation: none;
+}
+
+::view-transition-old(theme-switch) {
+  display: none;
+}
+
+::view-transition-new(theme-switch) {
+  animation: none;
+}
+
+/* colours must land instantly under the wipe; the switch knob keeps its slide */
+html.theme-wipe *:not([role="switch"], [role="switch"] *) {
+  transition: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

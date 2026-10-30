@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
+import { switchTheme } from "../../lib/theme-transition";
 import { Menu, Moon, Sun, X } from "lucide-react";
 import Logo from "../logo";
 import { useContent } from "../../lib/content";
@@ -25,13 +27,15 @@ function ThemeSwitch({ isDark, onToggle }) {
       aria-checked={isDark}
       aria-label={`Switch to ${isDark ? "light" : "dark"} mode`}
       onClick={onToggle}
-      className="relative flex h-8 w-14 shrink-0 items-center rounded-full bg-secondary/70 p-1 text-muted-foreground ring-1 ring-border transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      style={{ viewTransitionName: "theme-switch" }}
+      className="group relative flex h-8 w-14 shrink-0 items-center rounded-full bg-secondary/70 p-1 text-muted-foreground ring-1 ring-border transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
     >
       <Sun className="absolute left-1.5 size-3.5" aria-hidden="true" />
       <Moon className="absolute right-1.5 size-3.5" aria-hidden="true" />
+      {/* knob: expo ease-out slide (the loader's curve) that stretches slightly on press */}
       <span
-        className={`z-10 size-6 rounded-full bg-foreground shadow-sm transition-transform duration-200 ${
-          isDark ? "translate-x-6" : "translate-x-0"
+        className={`z-10 h-6 w-6 rounded-full bg-foreground shadow-sm transition-[transform,width] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-active:w-7 motion-reduce:transition-none ${
+          isDark ? "translate-x-6 group-active:translate-x-5" : "translate-x-0"
         }`}
       />
     </button>
@@ -101,7 +105,12 @@ export default function Navbar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- menus only changes with hasCerts
   }, [hasCerts, hasCreative, hasJourney]);
 
-  const toggleTheme = () => setIsDark((currentTheme) => !currentTheme);
+  const toggleTheme = () =>
+    switchTheme(() => {
+      // the transition snapshots right after this callback, so flip the class now
+      document.documentElement.classList.toggle("dark", !isDark);
+      flushSync(() => setIsDark(!isDark));
+    });
 
   return (
     <>
