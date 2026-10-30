@@ -10,6 +10,7 @@ const baseMenus = [
   { name: "Projects", link: "#projects" },
   { name: "Skills", link: "#skills" },
   { name: "About", link: "#about" },
+  { name: "Personality", link: "#personality" },
   { name: "Journey", link: "#journey" },
   { name: "Certifications", link: "#certifications" },
   { name: "Beyond the Code", link: "#creative" },
@@ -205,7 +206,7 @@ export default function Navbar() {
             inert={!isMenuOpen}
             className={`mt-2 origin-top overflow-hidden rounded-3xl border border-border bg-background/70 backdrop-blur-xl transition-all duration-300 ${
               isMenuOpen
-                ? "max-h-96 scale-100 opacity-100"
+                ? "max-h-112 scale-100 opacity-100"
                 : "max-h-0 scale-95 border-transparent opacity-0"
             }`}
           >

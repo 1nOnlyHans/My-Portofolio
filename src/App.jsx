@@ -5,6 +5,7 @@ import Hero from "./sections/hero";
 import About from "./sections/about";
 import Contact from "./sections/contact";
 import Journey from "./sections/journey";
+import Personality from "./sections/personality";
 import Projects from "./sections/projects";
 import Skills from "./sections/skills";
 import Creative from "./sections/creative";
@@ -23,6 +24,7 @@ function App() {
           <Projects id="projects" />
           <Skills id="skills" />
           <About id="about" />
+          <Personality id="personality" />
           <Journey />
           <Certifications id="certifications" />
           <Creative id="creative" />
